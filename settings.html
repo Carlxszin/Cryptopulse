@@ -165,11 +165,16 @@
             <div class="p-6 space-y-6 max-h-[70vh] overflow-y-auto">
                 <form id="warranty-form" class="space-y-4">
                     <input type="hidden" id="entry-id">
+                    <input type="hidden" id="existing-photo-data"> <!-- Armazena a foto atual ao editar -->
                     
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label class="block mb-2 text-sm font-medium text-slate-900 dark:text-white">Nome do Cliente</label>
                             <input type="text" id="client-name" required class="bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5 dark:bg-slate-700 dark:border-slate-600 dark:placeholder-slate-400 dark:text-white" placeholder="Ex: João Silva">
+                        </div>
+                        <div>
+                            <label class="block mb-2 text-sm font-medium text-slate-900 dark:text-white">CPF do Dono</label>
+                            <input type="text" id="cpf" class="bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5 dark:bg-slate-700 dark:border-slate-600 dark:placeholder-slate-400 dark:text-white" placeholder="Ex: 000.000.000-00">
                         </div>
                         <div>
                             <label class="block mb-2 text-sm font-medium text-slate-900 dark:text-white">Marca</label>
@@ -186,6 +191,19 @@
                             <label class="block mb-2 text-sm font-medium text-slate-900 dark:text-white">Modelo</label>
                             <input type="text" id="model" required class="bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5 dark:bg-slate-700 dark:border-slate-600 dark:placeholder-slate-400 dark:text-white" placeholder="Ex: Galaxy S23">
                         </div>
+                        
+                        <!-- Campo de Imagem da Galeria -->
+                        <div class="md:col-span-2">
+                            <label class="block mb-2 text-sm font-medium text-slate-900 dark:text-white">Foto do Aparelho</label>
+                            <div class="flex items-center gap-4">
+                                <div id="image-preview-container" class="hidden w-16 h-16 shrink-0 rounded-lg overflow-hidden border border-slate-300 dark:border-slate-600">
+                                    <img id="image-preview" src="" class="w-full h-full object-cover">
+                                </div>
+                                <input type="file" id="photo-input" accept="image/*" class="block w-full text-sm text-slate-900 border border-slate-300 rounded-lg cursor-pointer bg-slate-50 dark:text-slate-400 focus:outline-none dark:bg-slate-700 dark:border-slate-600 dark:placeholder-slate-400">
+                            </div>
+                            <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Formatos aceitos: JPG, PNG, WEBP (A imagem será comprimida automaticamente)</p>
+                        </div>
+
                         <div>
                             <label class="block mb-2 text-sm font-medium text-slate-900 dark:text-white">IMEI / Serial</label>
                             <input type="text" id="imei" class="bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5 dark:bg-slate-700 dark:border-slate-600 dark:placeholder-slate-400 dark:text-white" placeholder="Nº de Série">
@@ -196,15 +214,15 @@
                         </div>
                         <div>
                             <label class="block mb-2 text-sm font-medium text-slate-900 dark:text-white">Data da Compra</label>
-                            <input type="date" id="purchase-date" required class="bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5 dark:bg-slate-700 dark:border-slate-600 dark:placeholder-slate-400 dark:text-white">
+                            <input type="date" id="purchase-date" required class="bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5 dark:bg-slate-700 dark:border-slate-700 dark:placeholder-slate-400 dark:text-white">
                         </div>
                         <div>
                             <label class="block mb-2 text-sm font-medium text-slate-900 dark:text-white">Início Garantia</label>
-                            <input type="date" id="warranty-start" required class="bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5 dark:bg-slate-700 dark:border-slate-600 dark:placeholder-slate-400 dark:text-white">
+                            <input type="date" id="warranty-start" required class="bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5 dark:bg-slate-700 dark:border-slate-700 dark:placeholder-slate-400 dark:text-white">
                         </div>
-                        <div>
-                            <label class="block mb-2 text-sm font-medium text-slate-900 dark:text-white">Fim Garantia</label>
-                            <input type="date" id="warranty-end" required class="bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5 dark:bg-slate-700 dark:border-slate-600 dark:placeholder-slate-400 dark:text-white">
+                        <div class="md:col-span-2">
+                            <label class="block mb-2 text-sm font-medium text-slate-900 dark:text-white">Meses de Garantia</label>
+                            <input type="number" id="warranty-months" required min="1" class="bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5 dark:bg-slate-700 dark:border-slate-700 dark:placeholder-slate-400 dark:text-white" placeholder="Ex: 12">
                         </div>
                     </div>
                     <div>
@@ -241,21 +259,7 @@
         // --- Estado da Aplicação ---
         let warrantyData = JSON.parse(localStorage.getItem('warrantyManager_data')) || [];
         
-        // Dados de exemplo se estiver vazio (apenas na primeira vez)
         if (warrantyData.length === 0) {
-            const today = new Date();
-            const nextMonth = new Date();
-            nextMonth.setDate(today.getDate() + 25); // Expirando em breve
-            const nextYear = new Date();
-            nextYear.setFullYear(today.getFullYear() + 1); // Ativa
-            const pastMonth = new Date();
-            pastMonth.setDate(today.getDate() - 60); // Expirada
-
-            warrantyData = [
-                { id: 1, name: "Maria Oliveira", brand: "Samsung", model: "Galaxy A54", imei: "123456789012345", price: 1999.00, purchaseDate: "2023-10-15", warrantyStart: "2023-10-15", warrantyEnd: nextYear.toISOString().split('T')[0], notes: "Aparelho em perfeito estado." },
-                { id: 2, name: "Carlos Santos", brand: "Apple", model: "iPhone 11", imei: "987654321098765", price: 2500.00, purchaseDate: "2022-01-10", warrantyStart: "2022-01-10", warrantyEnd: pastMonth.toISOString().split('T')[0], notes: "Garantia estendida expirou." },
-                { id: 3, name: "Ana Costa", brand: "Motorola", model: "Moto G52", imei: "456123789456123", price: 1200.00, purchaseDate: "2023-01-20", warrantyStart: "2023-01-20", warrantyEnd: nextMonth.toISOString().split('T')[0], notes: "Cliente relatou aquecimento." }
-            ];
             saveToLocalStorage();
         }
 
@@ -310,8 +314,47 @@
         }
 
         function saveToLocalStorage() {
-            localStorage.setItem('warrantyManager_data', JSON.stringify(warrantyData));
-            renderApp();
+            try {
+                localStorage.setItem('warrantyManager_data', JSON.stringify(warrantyData));
+                renderApp();
+            } catch (e) {
+                alert("Erro: O armazenamento local está cheio. Tente excluir registros antigos ou usar imagens menores.");
+                console.error(e);
+            }
+        }
+
+        // --- Processamento de Imagem (Compressão) ---
+        function compressImage(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = (event) => {
+                    const img = new Image();
+                    img.src = event.target.result;
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        const MAX_WIDTH = 800; // Largura máxima para economizar espaço
+                        const scaleSize = MAX_WIDTH / img.width;
+                        
+                        // Se a imagem for menor que o limite, não redimensiona
+                        if (scaleSize >= 1) {
+                             resolve(event.target.result);
+                             return;
+                        }
+
+                        canvas.width = MAX_WIDTH;
+                        canvas.height = img.height * scaleSize;
+
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                        
+                        // Converte para JPEG com qualidade 0.7 para economizar espaço
+                        resolve(canvas.toDataURL('image/jpeg', 0.7));
+                    };
+                    img.onerror = (error) => reject(error);
+                };
+                reader.onerror = (error) => reject(error);
+            });
         }
 
         // --- Renderização ---
@@ -324,7 +367,8 @@
             let filtered = warrantyData.filter(item => 
                 item.name.toLowerCase().includes(search) ||
                 item.model.toLowerCase().includes(search) ||
-                item.imei.includes(search)
+                (item.imei && item.imei.includes(search)) ||
+                (item.cpf && item.cpf.includes(search))
             );
 
             // Ordenação
@@ -332,7 +376,7 @@
                 if (sortType === 'end_asc') return new Date(a.warrantyEnd) - new Date(b.warrantyEnd);
                 if (sortType === 'end_desc') return new Date(b.warrantyEnd) - new Date(a.warrantyEnd);
                 if (sortType === 'name_asc') return a.name.localeCompare(b.name);
-                if (sortType === 'date_desc') return (b.id) - (a.id); // Assumindo ID incremental como ordem de criação
+                if (sortType === 'date_desc') return (b.id) - (a.id);
                 return 0;
             });
 
@@ -358,21 +402,33 @@
                     card.innerHTML = `
                         <div class="p-5 flex-1">
                             <div class="flex justify-between items-start mb-4">
-                                <div>
-                                    <h3 class="font-bold text-lg text-slate-900 dark:text-white truncate" title="${item.name}">${item.name}</h3>
-                                    <p class="text-sm text-slate-500 dark:text-slate-400 font-medium">${item.brand} ${item.model}</p>
+                                <div class="flex gap-3 items-center">
+                                    ${item.photoData ? 
+                                        `<img src="${item.photoData}" alt="Foto do ${item.model}" class="w-12 h-12 rounded-lg object-cover border border-slate-200 dark:border-slate-700 cursor-pointer" onclick="viewImage('${item.photoData}')">` : 
+                                        `<div class="w-12 h-12 rounded-lg bg-slate-100 dark:bg-slate-700 flex items-center justify-center">
+                                            <i data-lucide="smartphone" class="w-6 h-6 text-slate-400"></i>
+                                        </div>`
+                                    }
+                                    <div class="overflow-hidden">
+                                        <h3 class="font-bold text-lg text-slate-900 dark:text-white truncate" title="${item.name}">${item.name}</h3>
+                                        <p class="text-sm text-slate-500 dark:text-slate-400 font-medium">${item.brand} ${item.model}</p>
+                                    </div>
                                 </div>
-                                <span class="px-2.5 py-1 rounded-full text-xs font-semibold border ${status.color}">${status.label}</span>
+                                <span class="px-2.5 py-1 rounded-full text-xs font-semibold border ${status.color} shrink-0">${status.label}</span>
                             </div>
                             
                             <div class="space-y-2 text-sm text-slate-600 dark:text-slate-300">
+                                <div class="flex items-center gap-2">
+                                    <i data-lucide="user" class="w-4 h-4 text-slate-400"></i>
+                                    <span>CPF: ${item.cpf || '-'}</span>
+                                </div>
                                 <div class="flex items-center gap-2">
                                     <i data-lucide="barcode" class="w-4 h-4 text-slate-400"></i>
                                     <span class="font-mono text-xs bg-slate-100 dark:bg-slate-700 px-1.5 py-0.5 rounded">${item.imei || 'S/N'}</span>
                                 </div>
                                 <div class="flex items-center gap-2">
                                     <i data-lucide="calendar" class="w-4 h-4 text-slate-400"></i>
-                                    <span>Vence: <strong class="${status.type === 'expired' ? 'text-danger' : ''}">${formatDate(item.warrantyEnd)}</strong></span>
+                                    <span>Vence: <strong class="${status.type === 'expired' ? 'text-danger' : ''}">${formatDate(item.warrantyEnd)}</strong> (${item.warrantyMonths} meses)</span>
                                 </div>
                                 <div class="flex items-center gap-2">
                                     <i data-lucide="tag" class="w-4 h-4 text-slate-400"></i>
@@ -397,6 +453,12 @@
                 });
             }
             lucide.createIcons();
+        }
+
+        // Função para visualizar imagem grande
+        function viewImage(src) {
+            const win = window.open();
+            win.document.write(`<img src="${src}" style="max-width:100%; height:auto;">`);
         }
 
         function updateStats() {
@@ -430,6 +492,19 @@
         const modalDelete = document.getElementById('modal-delete');
         const form = document.getElementById('warranty-form');
 
+        // Pré-visualização da imagem no formulário
+        document.getElementById('photo-input').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('image-preview').src = e.target.result;
+                    document.getElementById('image-preview-container').classList.remove('hidden');
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+
         function openModal(isEdit = false) {
             modal.classList.remove('hidden');
             modal.classList.add('flex');
@@ -437,9 +512,11 @@
             if (!isEdit) {
                 form.reset();
                 document.getElementById('entry-id').value = '';
+                document.getElementById('existing-photo-data').value = '';
+                document.getElementById('image-preview').src = '';
+                document.getElementById('image-preview-container').classList.add('hidden');
                 document.getElementById('modal-title').innerText = 'Novo Cadastro';
                 
-                // Preencher data de hoje por conveniência
                 const today = new Date().toISOString().split('T')[0];
                 document.getElementById('purchase-date').value = today;
                 document.getElementById('warranty-start').value = today;
@@ -451,34 +528,57 @@
             modal.classList.remove('flex');
         }
 
-        function saveData() {
-            // Validação simples
+        async function saveData() {
             if (!form.checkValidity()) {
                 form.reportValidity();
                 return;
             }
 
-            const idInput = document.getElementById('entry-id').value;
+            // Mostra carregamento ou bloqueia botão aqui se quiser (opcional)
             
+            const idInput = document.getElementById('entry-id').value;
+            const warrantyStart = document.getElementById('warranty-start').value;
+            const warrantyMonths = parseInt(document.getElementById('warranty-months').value);
+
+            // Calcular data final
+            const startDate = new Date(warrantyStart);
+            const endDate = new Date(startDate);
+            endDate.setMonth(startDate.getMonth() + warrantyMonths);
+            
+            // Processar Imagem
+            const fileInput = document.getElementById('photo-input');
+            let finalPhotoData = document.getElementById('existing-photo-data').value;
+
+            if (fileInput.files.length > 0) {
+                try {
+                    finalPhotoData = await compressImage(fileInput.files[0]);
+                } catch (error) {
+                    console.error("Erro ao processar imagem", error);
+                    alert("Erro ao processar a imagem.");
+                    return;
+                }
+            }
+
             const newItem = {
                 id: idInput ? parseInt(idInput) : Date.now(),
                 name: document.getElementById('client-name').value,
+                cpf: document.getElementById('cpf').value,
                 brand: document.getElementById('brand').value,
                 model: document.getElementById('model').value,
+                photoData: finalPhotoData, // Agora salva o base64
                 imei: document.getElementById('imei').value,
                 price: parseFloat(document.getElementById('price').value) || 0,
                 purchaseDate: document.getElementById('purchase-date').value,
-                warrantyStart: document.getElementById('warranty-start').value,
-                warrantyEnd: document.getElementById('warranty-end').value,
+                warrantyStart: warrantyStart,
+                warrantyMonths: warrantyMonths,
+                warrantyEnd: endDate.toISOString().split('T')[0],
                 notes: document.getElementById('notes').value
             };
 
             if (idInput) {
-                // Editar
                 const index = warrantyData.findIndex(i => i.id == idInput);
                 if (index > -1) warrantyData[index] = newItem;
             } else {
-                // Criar
                 warrantyData.push(newItem);
             }
 
@@ -492,14 +592,27 @@
 
             document.getElementById('entry-id').value = item.id;
             document.getElementById('client-name').value = item.name;
+            document.getElementById('cpf').value = item.cpf || '';
             document.getElementById('brand').value = item.brand;
             document.getElementById('model').value = item.model;
             document.getElementById('imei').value = item.imei;
             document.getElementById('price').value = item.price;
             document.getElementById('purchase-date').value = item.purchaseDate;
             document.getElementById('warranty-start').value = item.warrantyStart;
-            document.getElementById('warranty-end').value = item.warrantyEnd;
+            document.getElementById('warranty-months').value = item.warrantyMonths;
             document.getElementById('notes').value = item.notes;
+
+            // Lidar com a imagem
+            document.getElementById('photo-input').value = ''; // Limpar input de arquivo
+            document.getElementById('existing-photo-data').value = item.photoData || '';
+            
+            if (item.photoData) {
+                document.getElementById('image-preview').src = item.photoData;
+                document.getElementById('image-preview-container').classList.remove('hidden');
+            } else {
+                document.getElementById('image-preview').src = '';
+                document.getElementById('image-preview-container').classList.add('hidden');
+            }
 
             document.getElementById('modal-title').innerText = 'Editar Cadastro';
             openModal(true);
@@ -532,18 +645,22 @@
             }
 
             let csvContent = "data:text/csv;charset=utf-8,";
-            csvContent += "ID,Cliente,Marca,Modelo,IMEI,Preço,Compra,Início Garantia,Fim Garantia,Observações\n";
+            // Nota: Não exportamos o base64 da imagem para o CSV pois ficaria gigante e quebraria a formatação
+            csvContent += "ID,Cliente,CPF,Marca,Modelo,Tem Foto?,IMEI,Preço,Compra,Início Garantia,Meses,Fim Garantia,Observações\n";
 
             warrantyData.forEach(row => {
                 const rowStr = [
                     row.id,
                     `"${row.name}"`,
+                    `"${row.cpf || ''}"`,
                     `"${row.brand}"`,
                     `"${row.model}"`,
+                    row.photoData ? "Sim" : "Não",
                     `"${row.imei}"`,
                     row.price.toFixed(2),
                     row.purchaseDate,
                     row.warrantyStart,
+                    row.warrantyMonths,
                     row.warrantyEnd,
                     `"${row.notes.replace(/\n/g, ' ')}"`
                 ].join(",");
@@ -559,22 +676,13 @@
             document.body.removeChild(link);
         }
 
-        // Inicialização
         window.addEventListener('DOMContentLoaded', () => {
             initTheme();
             renderApp();
-            
-            // Auto preencher garantia (ex: +1 ano) ao mudar a data de início
-            document.getElementById('warranty-start').addEventListener('change', (e) => {
-                if(!document.getElementById('warranty-end').value && e.target.value) {
-                    const start = new Date(e.target.value);
-                    start.setFullYear(start.getFullYear() + 1);
-                    document.getElementById('warranty-end').value = start.toISOString().split('T')[0];
-                }
-            });
         });
 
     </script>
 </body>
 </html>
+
 
