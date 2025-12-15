@@ -1,39 +1,583 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" class="light">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title data-i18n="title">Configurações - CryptoPulse</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" as="style" onload="this.rel='stylesheet'">
-  <style>
-    :root {
-      --bg-color: #0e0e10;
-      --text-color: #f0f0f0;
-      --card-bg: #1f1f23;
-      --card-hover: #27272a;
-      --primary-color: #3b82f6;
-      --accent-color: #93c5fd;
-      --shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-    }
-    [data-theme="light"] {
-      --bg-color: #f3f4f6;
-      --text-color: #1f2937;
-      --card-bg: #ffffff;
-      --card-hover: #f9fafb;
-      --primary-color: #2563eb;
-      --accent-color: #60a5fa;
-      --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: 'Inter', sans-serif;
-      background: var(--bg-color);
-      color: var(--text-color);
-      min-height: 100vh;
-    }
-    header {
-      background: var(--primary-color);
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GarantiaSmart - Gerenciador de Garantias</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Ícones Lucide -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Configuração do Tailwind -->
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3b82f6',
+                        secondary: '#64748b',
+                        success: '#22c55e',
+                        warning: '#eab308',
+                        danger: '#ef4444',
+                        dark: {
+                            bg: '#0f172a',
+                            card: '#1e293b',
+                            text: '#f1f5f9'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        body {
+            transition: background-color 0.3s, color 0.3s;
+        }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        .dark ::-webkit-scrollbar-thumb {
+            background: #475569;
+        }
+        
+        .status-badge {
+            transition: all 0.3s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-slate-800 dark:bg-dark-bg dark:text-dark-text min-h-screen font-sans">
+
+    <!-- Navegação -->
+    <nav class="sticky top-0 z-40 w-full backdrop-blur flex-none transition-colors duration-500 lg:z-50 lg:border-b lg:border-slate-900/10 dark:border-slate-50/[0.06] bg-white/75 dark:bg-dark-card/75 supports-backdrop-blur:bg-white/95">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center gap-2">
+                    <i data-lucide="smartphone" class="w-6 h-6 text-primary"></i>
+                    <span class="font-bold text-xl tracking-tight">GarantiaSmart</span>
+                </div>
+                <div class="flex items-center gap-3">
+                    <button onclick="toggleTheme()" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors" title="Alternar Tema">
+                        <i data-lucide="moon" id="theme-icon" class="w-5 h-5"></i>
+                    </button>
+                    <button onclick="exportToCSV()" class="hidden sm:flex items-center gap-2 px-3 py-2 text-sm font-medium text-slate-600 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700 dark:hover:bg-slate-700 transition-all">
+                        <i data-lucide="download" class="w-4 h-4"></i> Exportar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Conteúdo Principal -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        <!-- Dashboard Stats -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+            <div class="bg-white dark:bg-dark-card p-4 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700">
+                <p class="text-sm font-medium text-slate-500 dark:text-slate-400">Total Aparelhos</p>
+                <p class="text-2xl font-bold mt-1" id="stat-total">0</p>
+            </div>
+            <div class="bg-white dark:bg-dark-card p-4 rounded-xl shadow-sm border-l-4 border-l-success border-y border-r border-slate-200 dark:border-slate-700 dark:border-l-success">
+                <p class="text-sm font-medium text-slate-500 dark:text-slate-400">Garantia Ativa</p>
+                <p class="text-2xl font-bold mt-1 text-success" id="stat-active">0</p>
+            </div>
+            <div class="bg-white dark:bg-dark-card p-4 rounded-xl shadow-sm border-l-4 border-l-warning border-y border-r border-slate-200 dark:border-slate-700 dark:border-l-warning">
+                <p class="text-sm font-medium text-slate-500 dark:text-slate-400">Vencendo (30d)</p>
+                <p class="text-2xl font-bold mt-1 text-warning" id="stat-expiring">0</p>
+            </div>
+            <div class="bg-white dark:bg-dark-card p-4 rounded-xl shadow-sm border-l-4 border-l-danger border-y border-r border-slate-200 dark:border-slate-700 dark:border-l-danger">
+                <p class="text-sm font-medium text-slate-500 dark:text-slate-400">Expiradas</p>
+                <p class="text-2xl font-bold mt-1 text-danger" id="stat-expired">0</p>
+            </div>
+        </div>
+
+        <!-- Barra de Ações e Filtros -->
+        <div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-6">
+            <div class="relative w-full md:w-96">
+                <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                    <i data-lucide="search" class="w-5 h-5 text-slate-400"></i>
+                </div>
+                <input type="text" id="search-input" oninput="filterData()" 
+                    class="block w-full p-2.5 pl-10 text-sm text-slate-900 border border-slate-300 rounded-lg bg-white focus:ring-primary focus:border-primary dark:bg-slate-800 dark:border-slate-600 dark:placeholder-slate-400 dark:text-white dark:focus:ring-primary dark:focus:border-primary" 
+                    placeholder="Buscar por nome, modelo ou IMEI...">
+            </div>
+
+            <div class="flex gap-2 w-full md:w-auto">
+                <select id="sort-select" onchange="filterData()" class="bg-white border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-primary focus:border-primary block p-2.5 dark:bg-slate-800 dark:border-slate-600 dark:placeholder-slate-400 dark:text-white">
+                    <option value="end_asc">Vencimento (Mais cedo)</option>
+                    <option value="end_desc">Vencimento (Mais tarde)</option>
+                    <option value="name_asc">Cliente (A-Z)</option>
+                    <option value="date_desc">Cadastro (Recente)</option>
+                </select>
+                
+                <button onclick="openModal()" class="flex items-center gap-2 text-white bg-primary hover:bg-blue-600 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 w-full md:w-auto justify-center shadow-lg shadow-blue-500/30 transition-all">
+                    <i data-lucide="plus" class="w-4 h-4"></i>
+                    Novo Cadastro
+                </button>
+            </div>
+        </div>
+
+        <!-- Lista de Cards (Grid) -->
+        <div id="warranty-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Os cards serão injetados aqui via JS -->
+        </div>
+
+        <!-- Estado Vazio -->
+        <div id="empty-state" class="hidden flex-col items-center justify-center py-16 text-center">
+            <div class="bg-slate-100 dark:bg-slate-800 p-4 rounded-full mb-4">
+                <i data-lucide="inbox" class="w-12 h-12 text-slate-400"></i>
+            </div>
+            <h3 class="text-lg font-medium text-slate-900 dark:text-white">Nenhum registro encontrado</h3>
+            <p class="text-slate-500 dark:text-slate-400 mt-1">Comece adicionando um novo smartphone ou ajuste sua busca.</p>
+        </div>
+
+    </main>
+
+    <!-- Modal de Cadastro/Edição -->
+    <div id="modal-form" tabindex="-1" aria-hidden="true" class="hidden fixed inset-0 z-50 w-full h-full bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+        <div class="relative w-full max-w-2xl max-h-full bg-white rounded-xl shadow-2xl dark:bg-dark-card border border-slate-200 dark:border-slate-700">
+            <!-- Modal Header -->
+            <div class="flex items-start justify-between p-4 border-b rounded-t dark:border-slate-600">
+                <h3 class="text-xl font-semibold text-slate-900 dark:text-white" id="modal-title">
+                    Novo Cadastro
+                </h3>
+                <button onclick="closeModal()" type="button" class="text-slate-400 bg-transparent hover:bg-slate-200 hover:text-slate-900 rounded-lg text-sm w-8 h-8 ml-auto inline-flex justify-center items-center dark:hover:bg-slate-600 dark:hover:text-white">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <!-- Modal Body -->
+            <div class="p-6 space-y-6 max-h-[70vh] overflow-y-auto">
+                <form id="warranty-form" class="space-y-4">
+                    <input type="hidden" id="entry-id">
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block mb-2 text-sm font-medium text-slate-900 dark:text-white">Nome do Cliente</label>
+                            <input type="text" id="client-name" required class="bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5 dark:bg-slate-700 dark:border-slate-600 dark:placeholder-slate-400 dark:text-white" placeholder="Ex: João Silva">
+                        </div>
+                        <div>
+                            <label class="block mb-2 text-sm font-medium text-slate-900 dark:text-white">Marca</label>
+                            <input type="text" id="brand" list="brands" required class="bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5 dark:bg-slate-700 dark:border-slate-600 dark:placeholder-slate-400 dark:text-white" placeholder="Ex: Samsung">
+                            <datalist id="brands">
+                                <option value="Samsung">
+                                <option value="Apple">
+                                <option value="Motorola">
+                                <option value="Xiaomi">
+                                <option value="LG">
+                            </datalist>
+                        </div>
+                        <div>
+                            <label class="block mb-2 text-sm font-medium text-slate-900 dark:text-white">Modelo</label>
+                            <input type="text" id="model" required class="bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5 dark:bg-slate-700 dark:border-slate-600 dark:placeholder-slate-400 dark:text-white" placeholder="Ex: Galaxy S23">
+                        </div>
+                        <div>
+                            <label class="block mb-2 text-sm font-medium text-slate-900 dark:text-white">IMEI / Serial</label>
+                            <input type="text" id="imei" class="bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5 dark:bg-slate-700 dark:border-slate-600 dark:placeholder-slate-400 dark:text-white" placeholder="Nº de Série">
+                        </div>
+                        <div>
+                            <label class="block mb-2 text-sm font-medium text-slate-900 dark:text-white">Valor Pago (R$)</label>
+                            <input type="number" id="price" step="0.01" class="bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5 dark:bg-slate-700 dark:border-slate-600 dark:placeholder-slate-400 dark:text-white" placeholder="0,00">
+                        </div>
+                        <div>
+                            <label class="block mb-2 text-sm font-medium text-slate-900 dark:text-white">Data da Compra</label>
+                            <input type="date" id="purchase-date" required class="bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5 dark:bg-slate-700 dark:border-slate-600 dark:placeholder-slate-400 dark:text-white">
+                        </div>
+                        <div>
+                            <label class="block mb-2 text-sm font-medium text-slate-900 dark:text-white">Início Garantia</label>
+                            <input type="date" id="warranty-start" required class="bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5 dark:bg-slate-700 dark:border-slate-600 dark:placeholder-slate-400 dark:text-white">
+                        </div>
+                        <div>
+                            <label class="block mb-2 text-sm font-medium text-slate-900 dark:text-white">Fim Garantia</label>
+                            <input type="date" id="warranty-end" required class="bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5 dark:bg-slate-700 dark:border-slate-600 dark:placeholder-slate-400 dark:text-white">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block mb-2 text-sm font-medium text-slate-900 dark:text-white">Observações</label>
+                        <textarea id="notes" rows="3" class="bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5 dark:bg-slate-700 dark:border-slate-600 dark:placeholder-slate-400 dark:text-white" placeholder="Detalhes sobre o estado do aparelho, defeitos, etc."></textarea>
+                    </div>
+                </form>
+            </div>
+            <!-- Modal Footer -->
+            <div class="flex items-center p-6 space-x-2 border-t border-slate-200 rounded-b dark:border-slate-600 bg-slate-50 dark:bg-slate-800/50 rounded-b-xl">
+                <button onclick="saveData()" type="button" class="text-white bg-primary hover:bg-blue-600 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Salvar</button>
+                <button onclick="closeModal()" type="button" class="text-slate-500 bg-white hover:bg-slate-100 focus:ring-4 focus:outline-none focus:ring-slate-200 rounded-lg border border-slate-200 text-sm font-medium px-5 py-2.5 hover:text-slate-900 focus:z-10 dark:bg-slate-700 dark:text-slate-300 dark:border-slate-500 dark:hover:text-white dark:hover:bg-slate-600 dark:focus:ring-slate-600">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmação de Exclusão -->
+    <div id="modal-delete" tabindex="-1" class="hidden fixed inset-0 z-50 w-full h-full bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="relative w-full max-w-md bg-white rounded-lg shadow dark:bg-dark-card border border-slate-200 dark:border-slate-700">
+            <div class="p-6 text-center">
+                <i data-lucide="alert-triangle" class="mx-auto mb-4 text-slate-400 w-12 h-12 dark:text-slate-200"></i>
+                <h3 class="mb-5 text-lg font-normal text-slate-500 dark:text-slate-400">Tem certeza que deseja excluir este registro?</h3>
+                <input type="hidden" id="delete-id">
+                <button onclick="confirmDelete()" type="button" class="text-white bg-red-600 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 dark:focus:ring-red-800 font-medium rounded-lg text-sm inline-flex items-center px-5 py-2.5 text-center mr-2">
+                    Sim, excluir
+                </button>
+                <button onclick="closeDeleteModal()" type="button" class="text-slate-500 bg-white hover:bg-slate-100 focus:ring-4 focus:outline-none focus:ring-slate-200 rounded-lg border border-slate-200 text-sm font-medium px-5 py-2.5 hover:text-slate-900 focus:z-10 dark:bg-slate-700 dark:text-slate-300 dark:border-slate-500 dark:hover:text-white dark:hover:bg-slate-600 dark:focus:ring-slate-600">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Principal -->
+    <script>
+        // --- Estado da Aplicação ---
+        let warrantyData = JSON.parse(localStorage.getItem('warrantyManager_data')) || [];
+        
+        // Dados de exemplo se estiver vazio (apenas na primeira vez)
+        if (warrantyData.length === 0) {
+            const today = new Date();
+            const nextMonth = new Date();
+            nextMonth.setDate(today.getDate() + 25); // Expirando em breve
+            const nextYear = new Date();
+            nextYear.setFullYear(today.getFullYear() + 1); // Ativa
+            const pastMonth = new Date();
+            pastMonth.setDate(today.getDate() - 60); // Expirada
+
+            warrantyData = [
+                { id: 1, name: "Maria Oliveira", brand: "Samsung", model: "Galaxy A54", imei: "123456789012345", price: 1999.00, purchaseDate: "2023-10-15", warrantyStart: "2023-10-15", warrantyEnd: nextYear.toISOString().split('T')[0], notes: "Aparelho em perfeito estado." },
+                { id: 2, name: "Carlos Santos", brand: "Apple", model: "iPhone 11", imei: "987654321098765", price: 2500.00, purchaseDate: "2022-01-10", warrantyStart: "2022-01-10", warrantyEnd: pastMonth.toISOString().split('T')[0], notes: "Garantia estendida expirou." },
+                { id: 3, name: "Ana Costa", brand: "Motorola", model: "Moto G52", imei: "456123789456123", price: 1200.00, purchaseDate: "2023-01-20", warrantyStart: "2023-01-20", warrantyEnd: nextMonth.toISOString().split('T')[0], notes: "Cliente relatou aquecimento." }
+            ];
+            saveToLocalStorage();
+        }
+
+        // --- Configuração de Tema ---
+        function initTheme() {
+            if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+                document.getElementById('theme-icon').setAttribute('data-lucide', 'sun');
+            } else {
+                document.documentElement.classList.remove('dark');
+                document.getElementById('theme-icon').setAttribute('data-lucide', 'moon');
+            }
+            lucide.createIcons();
+        }
+
+        function toggleTheme() {
+            if (document.documentElement.classList.contains('dark')) {
+                document.documentElement.classList.remove('dark');
+                localStorage.setItem('color-theme', 'light');
+                document.getElementById('theme-icon').setAttribute('data-lucide', 'moon');
+            } else {
+                document.documentElement.classList.add('dark');
+                localStorage.setItem('color-theme', 'dark');
+                document.getElementById('theme-icon').setAttribute('data-lucide', 'sun');
+            }
+            lucide.createIcons();
+        }
+
+        // --- Funções Auxiliares ---
+        function formatCurrency(value) {
+            return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return '-';
+            const [year, month, day] = dateString.split('-');
+            return `${day}/${month}/${year}`;
+        }
+
+        function getStatus(endDateStr) {
+            const today = new Date();
+            today.setHours(0,0,0,0);
+            const endDate = new Date(endDateStr);
+            endDate.setHours(23,59,59,999);
+
+            const diffTime = endDate - today;
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+            if (diffDays < 0) return { label: 'Expirada', color: 'text-danger bg-red-100 dark:bg-red-900/20 border-red-200 dark:border-red-800', type: 'expired' };
+            if (diffDays <= 30) return { label: `Vence em ${diffDays}d`, color: 'text-warning bg-yellow-100 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800', type: 'expiring' };
+            return { label: 'Ativa', color: 'text-success bg-green-100 dark:bg-green-900/20 border-green-200 dark:border-green-800', type: 'active' };
+        }
+
+        function saveToLocalStorage() {
+            localStorage.setItem('warrantyManager_data', JSON.stringify(warrantyData));
+            renderApp();
+        }
+
+        // --- Renderização ---
+        function renderApp() {
+            const container = document.getElementById('warranty-list');
+            const search = document.getElementById('search-input').value.toLowerCase();
+            const sortType = document.getElementById('sort-select').value;
+            
+            // Filtragem
+            let filtered = warrantyData.filter(item => 
+                item.name.toLowerCase().includes(search) ||
+                item.model.toLowerCase().includes(search) ||
+                item.imei.includes(search)
+            );
+
+            // Ordenação
+            filtered.sort((a, b) => {
+                if (sortType === 'end_asc') return new Date(a.warrantyEnd) - new Date(b.warrantyEnd);
+                if (sortType === 'end_desc') return new Date(b.warrantyEnd) - new Date(a.warrantyEnd);
+                if (sortType === 'name_asc') return a.name.localeCompare(b.name);
+                if (sortType === 'date_desc') return (b.id) - (a.id); // Assumindo ID incremental como ordem de criação
+                return 0;
+            });
+
+            // Atualizar Estatísticas
+            updateStats();
+
+            // Renderizar HTML
+            container.innerHTML = '';
+            
+            if (filtered.length === 0) {
+                document.getElementById('empty-state').classList.remove('hidden');
+                document.getElementById('empty-state').classList.add('flex');
+            } else {
+                document.getElementById('empty-state').classList.add('hidden');
+                document.getElementById('empty-state').classList.remove('flex');
+
+                filtered.forEach(item => {
+                    const status = getStatus(item.warrantyEnd);
+                    
+                    const card = document.createElement('div');
+                    card.className = "bg-white dark:bg-dark-card rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden card-hover transition-all flex flex-col";
+                    
+                    card.innerHTML = `
+                        <div class="p-5 flex-1">
+                            <div class="flex justify-between items-start mb-4">
+                                <div>
+                                    <h3 class="font-bold text-lg text-slate-900 dark:text-white truncate" title="${item.name}">${item.name}</h3>
+                                    <p class="text-sm text-slate-500 dark:text-slate-400 font-medium">${item.brand} ${item.model}</p>
+                                </div>
+                                <span class="px-2.5 py-1 rounded-full text-xs font-semibold border ${status.color}">${status.label}</span>
+                            </div>
+                            
+                            <div class="space-y-2 text-sm text-slate-600 dark:text-slate-300">
+                                <div class="flex items-center gap-2">
+                                    <i data-lucide="barcode" class="w-4 h-4 text-slate-400"></i>
+                                    <span class="font-mono text-xs bg-slate-100 dark:bg-slate-700 px-1.5 py-0.5 rounded">${item.imei || 'S/N'}</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <i data-lucide="calendar" class="w-4 h-4 text-slate-400"></i>
+                                    <span>Vence: <strong class="${status.type === 'expired' ? 'text-danger' : ''}">${formatDate(item.warrantyEnd)}</strong></span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <i data-lucide="tag" class="w-4 h-4 text-slate-400"></i>
+                                    <span>${formatCurrency(item.price)}</span>
+                                </div>
+                                ${item.notes ? `
+                                <div class="mt-3 pt-3 border-t border-slate-100 dark:border-slate-700">
+                                    <p class="text-xs text-slate-500 italic line-clamp-2" title="${item.notes}">${item.notes}</p>
+                                </div>` : ''}
+                            </div>
+                        </div>
+                        <div class="bg-slate-50 dark:bg-slate-800/50 px-5 py-3 border-t border-slate-100 dark:border-slate-700 flex justify-end gap-2">
+                            <button onclick="editItem(${item.id})" class="p-1.5 text-slate-500 hover:text-primary hover:bg-blue-50 dark:hover:bg-slate-700 rounded-lg transition-colors" title="Editar">
+                                <i data-lucide="pencil" class="w-4 h-4"></i>
+                            </button>
+                            <button onclick="askDeleteItem(${item.id})" class="p-1.5 text-slate-500 hover:text-danger hover:bg-red-50 dark:hover:bg-slate-700 rounded-lg transition-colors" title="Excluir">
+                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    `;
+                    container.appendChild(card);
+                });
+            }
+            lucide.createIcons();
+        }
+
+        function updateStats() {
+            const today = new Date();
+            today.setHours(0,0,0,0);
+            
+            let total = warrantyData.length;
+            let active = 0;
+            let expiring = 0;
+            let expired = 0;
+
+            warrantyData.forEach(item => {
+                const status = getStatus(item.warrantyEnd);
+                if (status.type === 'active') active++;
+                if (status.type === 'expiring') expiring++;
+                if (status.type === 'expired') expired++;
+            });
+
+            document.getElementById('stat-total').innerText = total;
+            document.getElementById('stat-active').innerText = active;
+            document.getElementById('stat-expiring').innerText = expiring;
+            document.getElementById('stat-expired').innerText = expired;
+        }
+
+        function filterData() {
+            renderApp();
+        }
+
+        // --- Modais e Formulários ---
+        const modal = document.getElementById('modal-form');
+        const modalDelete = document.getElementById('modal-delete');
+        const form = document.getElementById('warranty-form');
+
+        function openModal(isEdit = false) {
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            
+            if (!isEdit) {
+                form.reset();
+                document.getElementById('entry-id').value = '';
+                document.getElementById('modal-title').innerText = 'Novo Cadastro';
+                
+                // Preencher data de hoje por conveniência
+                const today = new Date().toISOString().split('T')[0];
+                document.getElementById('purchase-date').value = today;
+                document.getElementById('warranty-start').value = today;
+            }
+        }
+
+        function closeModal() {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        function saveData() {
+            // Validação simples
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+
+            const idInput = document.getElementById('entry-id').value;
+            
+            const newItem = {
+                id: idInput ? parseInt(idInput) : Date.now(),
+                name: document.getElementById('client-name').value,
+                brand: document.getElementById('brand').value,
+                model: document.getElementById('model').value,
+                imei: document.getElementById('imei').value,
+                price: parseFloat(document.getElementById('price').value) || 0,
+                purchaseDate: document.getElementById('purchase-date').value,
+                warrantyStart: document.getElementById('warranty-start').value,
+                warrantyEnd: document.getElementById('warranty-end').value,
+                notes: document.getElementById('notes').value
+            };
+
+            if (idInput) {
+                // Editar
+                const index = warrantyData.findIndex(i => i.id == idInput);
+                if (index > -1) warrantyData[index] = newItem;
+            } else {
+                // Criar
+                warrantyData.push(newItem);
+            }
+
+            saveToLocalStorage();
+            closeModal();
+        }
+
+        function editItem(id) {
+            const item = warrantyData.find(i => i.id === id);
+            if (!item) return;
+
+            document.getElementById('entry-id').value = item.id;
+            document.getElementById('client-name').value = item.name;
+            document.getElementById('brand').value = item.brand;
+            document.getElementById('model').value = item.model;
+            document.getElementById('imei').value = item.imei;
+            document.getElementById('price').value = item.price;
+            document.getElementById('purchase-date').value = item.purchaseDate;
+            document.getElementById('warranty-start').value = item.warrantyStart;
+            document.getElementById('warranty-end').value = item.warrantyEnd;
+            document.getElementById('notes').value = item.notes;
+
+            document.getElementById('modal-title').innerText = 'Editar Cadastro';
+            openModal(true);
+        }
+
+        // --- Exclusão ---
+        function askDeleteItem(id) {
+            document.getElementById('delete-id').value = id;
+            modalDelete.classList.remove('hidden');
+            modalDelete.classList.add('flex');
+        }
+
+        function closeDeleteModal() {
+            modalDelete.classList.add('hidden');
+            modalDelete.classList.remove('flex');
+        }
+
+        function confirmDelete() {
+            const id = parseInt(document.getElementById('delete-id').value);
+            warrantyData = warrantyData.filter(i => i.id !== id);
+            saveToLocalStorage();
+            closeDeleteModal();
+        }
+
+        // --- Exportação ---
+        function exportToCSV() {
+            if(warrantyData.length === 0) {
+                alert("Não há dados para exportar.");
+                return;
+            }
+
+            let csvContent = "data:text/csv;charset=utf-8,";
+            csvContent += "ID,Cliente,Marca,Modelo,IMEI,Preço,Compra,Início Garantia,Fim Garantia,Observações\n";
+
+            warrantyData.forEach(row => {
+                const rowStr = [
+                    row.id,
+                    `"${row.name}"`,
+                    `"${row.brand}"`,
+                    `"${row.model}"`,
+                    `"${row.imei}"`,
+                    row.price.toFixed(2),
+                    row.purchaseDate,
+                    row.warrantyStart,
+                    row.warrantyEnd,
+                    `"${row.notes.replace(/\n/g, ' ')}"`
+                ].join(",");
+                csvContent += rowStr + "\n";
+            });
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "garantias_" + new Date().toISOString().split('T')[0] + ".csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // Inicialização
+        window.addEventListener('DOMContentLoaded', () => {
+            initTheme();
+            renderApp();
+            
+            // Auto preencher garantia (ex: +1 ano) ao mudar a data de início
+            document.getElementById('warranty-start').addEventListener('change', (e) => {
+                if(!document.getElementById('warranty-end').value && e.target.value) {
+                    const start = new Date(e.target.value);
+                    start.setFullYear(start.getFullYear() + 1);
+                    document.getElementById('warranty-end').value = start.toISOString().split('T')[0];
+                }
+            });
+        });
+
+    </script>
+</body>
+</html>
+
       padding: 8px 16px;
       box-shadow: var(--shadow);
       position: sticky;
