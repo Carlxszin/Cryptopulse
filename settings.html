@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title> Carlos Garantia - Gerenciador de Garantias</title>
+    <title>GarantiaSmart - Gerenciador de Garantias</title>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -144,7 +144,7 @@
                 <i data-lucide="inbox" class="w-12 h-12 text-slate-400"></i>
             </div>
             <h3 class="text-lg font-medium text-slate-900 dark:text-white">Nenhum registro encontrado</h3>
-            <p class="text-slate-500 dark:text-slate-400 mt-1">Comece adicionando um novo smartphone ou ajuste sua busca.</p>
+            <p class="text-slate-500 dark:text-slate-400 mt-1">Clique em "Novo Cadastro" para adicionar sua primeira garantia.</p>
         </div>
 
     </main>
@@ -257,12 +257,9 @@
     <!-- JavaScript Principal -->
     <script>
         // --- Estado da Aplicação ---
+        // A lista de garantias agora é carregada do localStorage ou inicia vazia.
         let warrantyData = JSON.parse(localStorage.getItem('warrantyManager_data')) || [];
         
-        if (warrantyData.length === 0) {
-            saveToLocalStorage();
-        }
-
         // --- Configuração de Tema ---
         function initTheme() {
             if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
@@ -462,9 +459,7 @@
         }
 
         function updateStats() {
-            const today = new Date();
-            today.setHours(0,0,0,0);
-            
+            // Reinicia as contagens para calcular as novas estatísticas
             let total = warrantyData.length;
             let active = 0;
             let expiring = 0;
@@ -517,6 +512,7 @@
                 document.getElementById('image-preview-container').classList.add('hidden');
                 document.getElementById('modal-title').innerText = 'Novo Cadastro';
                 
+                // Preenche as datas com o dia atual para facilitar o preenchimento
                 const today = new Date().toISOString().split('T')[0];
                 document.getElementById('purchase-date').value = today;
                 document.getElementById('warranty-start').value = today;
@@ -533,8 +529,6 @@
                 form.reportValidity();
                 return;
             }
-
-            // Mostra carregamento ou bloqueia botão aqui se quiser (opcional)
             
             const idInput = document.getElementById('entry-id').value;
             const warrantyStart = document.getElementById('warranty-start').value;
@@ -684,5 +678,4 @@
     </script>
 </body>
 </html>
-
 
