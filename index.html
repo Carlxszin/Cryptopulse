@@ -122,9 +122,9 @@
                         <a href="#produtos" class="bg-blue-600 text-white px-8 py-4 rounded-full font-semibold shadow-[0_0_20px_rgba(37,99,235,0.3)] hover:bg-blue-500 transition-all transform hover:-translate-y-1">
                             Ver Coleção
                         </a>
-                        <a href="https://wa.me/5511999999999" target="_blank" class="glass text-white px-8 py-4 rounded-full font-semibold hover:bg-white/10 transition-all border border-white/10 flex items-center gap-2">
+                        <button onclick="app.contactWhatsApp()" class="glass text-white px-8 py-4 rounded-full font-semibold hover:bg-white/10 transition-all border border-white/10 flex items-center gap-2">
                             <i class="fa-brands fa-whatsapp"></i> WhatsApp
-                        </a>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -191,9 +191,14 @@
                     <h2 class="text-3xl font-bold text-white">Gerenciar Estoque</h2>
                     <p class="text-gray-500 mt-1">Bem-vindo, Carlos</p>
                 </div>
-                <button onclick="app.showAddProductModal()" class="bg-green-600 text-white px-6 py-3 rounded-xl hover:bg-green-500 shadow-lg shadow-green-900/20 flex items-center transition border border-green-500/20">
-                    <i class="fa-solid fa-plus mr-2"></i> Adicionar Produto
-                </button>
+                <div class="flex gap-3">
+                    <button onclick="app.showSettingsModal()" class="bg-dark-800 text-gray-300 px-4 py-3 rounded-xl hover:bg-dark-700 hover:text-white shadow-lg border border-white/10 flex items-center transition">
+                        <i class="fa-solid fa-gear mr-2"></i> Configurar Loja
+                    </button>
+                    <button onclick="app.showAddProductModal()" class="bg-green-600 text-white px-6 py-3 rounded-xl hover:bg-green-500 shadow-lg shadow-green-900/20 flex items-center transition border border-green-500/20">
+                        <i class="fa-solid fa-plus mr-2"></i> Adicionar Produto
+                    </button>
+                </div>
             </div>
 
             <div class="glass-card rounded-2xl overflow-hidden border border-white/5">
@@ -293,10 +298,30 @@
         </div>
     </div>
 
+    <!-- Modal Configurações (NOVO) -->
+    <div id="settings-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/80 backdrop-blur-sm">
+        <div class="glass-card rounded-2xl shadow-2xl p-6 md:p-8 max-w-md w-full m-4 border border-white/10">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold text-white">Configurações da Loja</h3>
+                <button onclick="app.closeModal('settings-modal')" class="text-gray-400 hover:text-white transition"><i class="fa-solid fa-times text-xl"></i></button>
+            </div>
+            <form id="settings-form" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-medium text-gray-400 uppercase tracking-wider mb-2">Número do WhatsApp (com DDD)</label>
+                    <input type="text" id="setting-phone" placeholder="Ex: 5511999999999" class="block w-full rounded-xl bg-dark-800 border-gray-700 text-white focus:border-blue-500 border p-3 outline-none" required>
+                    <p class="text-xs text-gray-600 mt-2">Este número receberá as mensagens dos clientes.</p>
+                </div>
+                <div class="pt-2">
+                    <button type="submit" class="w-full bg-blue-600 text-white py-3.5 rounded-xl hover:bg-blue-500 font-semibold shadow-lg shadow-blue-900/20 transition">Salvar Configurações</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- Botão Flutuante WhatsApp -->
-    <a href="https://wa.me/5511999999999" target="_blank" class="fixed bottom-6 right-6 bg-[#25D366] hover:bg-[#20bd5a] text-white p-4 rounded-full shadow-[0_0_20px_rgba(37,211,102,0.4)] transition transform hover:scale-110 z-40 flex items-center justify-center group">
+    <div onclick="app.contactWhatsApp()" class="fixed bottom-6 right-6 bg-[#25D366] hover:bg-[#20bd5a] cursor-pointer text-white p-4 rounded-full shadow-[0_0_20px_rgba(37,211,102,0.4)] transition transform hover:scale-110 z-40 flex items-center justify-center group">
         <i class="fa-brands fa-whatsapp text-3xl group-hover:rotate-12 transition duration-300"></i>
-    </a>
+    </div>
 
     <!-- Notification Toast -->
     <div id="toast" class="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-white text-black px-6 py-3 rounded-xl shadow-2xl transition-all duration-300 opacity-0 pointer-events-none z-50 font-medium translate-y-4">
@@ -306,7 +331,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, collection, addDoc, getDocs, doc, deleteDoc, updateDoc, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, setDoc, getDocs, doc, deleteDoc, updateDoc, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyC_eJTAlkSBY6BMabDhD7PttC_rSOQ8wDY",
@@ -320,16 +345,19 @@
         const appCheck = initializeApp(firebaseConfig);
         const auth = getAuth(appCheck);
         const db = getFirestore(appCheck);
+        
+        // Coleções
         const productsCol = collection(db, "products");
+        const settingsDoc = doc(db, "settings", "config"); // Doc único para config global
 
         let currentUser = null;
         let products = [];
         let isEditing = false;
-        let currentImageBase64 = ''; // Guarda a imagem atual
+        let currentImageBase64 = ''; 
+        let storePhone = "5511999999999"; // Valor padrão se não houver no banco
 
         // --- Funções Auxiliares ---
 
-        // Função para comprimir imagem e converter para Base64
         const compressImage = (file) => {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
@@ -339,15 +367,12 @@
                     img.src = event.target.result;
                     img.onload = () => {
                         const canvas = document.createElement('canvas');
-                        // Redimensiona para no máximo 600px de largura para não estourar o banco
                         const MAX_WIDTH = 600;
                         const scaleSize = MAX_WIDTH / img.width;
                         canvas.width = MAX_WIDTH;
                         canvas.height = img.height * scaleSize;
-                        
                         const ctx = canvas.getContext('2d');
                         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                        // Comprime para JPEG com qualidade 0.7
                         resolve(canvas.toDataURL('image/jpeg', 0.7));
                     }
                 }
@@ -380,10 +405,13 @@
                 document.getElementById('product-form').reset();
                 document.getElementById('prod-id').value = '';
                 document.getElementById('image-preview').src = 'https://via.placeholder.com/100?text=Preview';
-                
-                // Reset visual inputs
                 app.toggleImageInput('file');
                 document.getElementById('product-modal').classList.remove('hidden');
+            },
+
+            showSettingsModal: () => {
+                document.getElementById('setting-phone').value = storePhone;
+                document.getElementById('settings-modal').classList.remove('hidden');
             },
 
             editProduct: (id) => {
@@ -391,19 +419,16 @@
                 if (!prod) return;
                 
                 isEditing = true;
-                currentImageBase64 = prod.image || ''; // Mantém a imagem atual
+                currentImageBase64 = prod.image || ''; 
                 
                 document.getElementById('modal-title').innerText = "Editar Produto";
                 document.getElementById('prod-id').value = prod.id;
                 document.getElementById('prod-name').value = prod.name;
                 document.getElementById('prod-price').value = prod.price;
                 document.getElementById('prod-desc').value = prod.description || '';
-                document.getElementById('prod-buy-link').value = prod.buyLink || ''; // Carrega link se existir
-                
-                // Preview da imagem
+                document.getElementById('prod-buy-link').value = prod.buyLink || ''; 
                 document.getElementById('image-preview').src = prod.image || 'https://via.placeholder.com/100?text=No+Img';
                 
-                // Se for URL externa, mostra no campo URL, se for base64, limpa url
                 if(prod.image && prod.image.startsWith('http')) {
                     document.getElementById('prod-image-url').value = prod.image;
                     app.toggleImageInput('url');
@@ -411,7 +436,6 @@
                     document.getElementById('prod-image-url').value = '';
                     app.toggleImageInput('file');
                 }
-
                 document.getElementById('product-modal').classList.remove('hidden');
             },
 
@@ -429,15 +453,17 @@
             
             buyItem: (productName, link) => {
                 if (link && link.trim() !== "") {
-                    // Se tiver link de pagamento, abre ele
                     window.open(link, '_blank');
                 } else {
-                    // Se não, vai pro WhatsApp
-                    const phone = "5511999999999"; 
                     const text = `Olá! Tenho interesse no *${productName}*.`;
-                    const url = `https://wa.me/${phone}?text=${encodeURIComponent(text)}`;
+                    const url = `https://wa.me/${storePhone}?text=${encodeURIComponent(text)}`;
                     window.open(url, '_blank');
                 }
+            },
+
+            contactWhatsApp: () => {
+                const url = `https://wa.me/${storePhone}?text=${encodeURIComponent("Olá! Gostaria de saber mais sobre a loja.")}`;
+                window.open(url, '_blank');
             },
 
             toggleImageInput: (type) => {
@@ -462,12 +488,10 @@
 
         // --- Event Listeners ---
 
-        // Preview da imagem ao selecionar arquivo
         document.getElementById('prod-image-file').addEventListener('change', async function(e) {
             if (this.files && this.files[0]) {
                 const file = this.files[0];
                 try {
-                    // Comprime e gera preview
                     const base64 = await compressImage(file);
                     currentImageBase64 = base64;
                     document.getElementById('image-preview').src = base64;
@@ -478,7 +502,6 @@
             }
         });
 
-        // Preview ao digitar URL
         document.getElementById('prod-image-url').addEventListener('input', function(e) {
             if(this.value) {
                 currentImageBase64 = this.value;
@@ -486,7 +509,6 @@
             }
         });
 
-        // Auth
         const loginForm = document.getElementById('login-form');
         loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -504,6 +526,30 @@
             } catch (error) {
                 errorDiv.innerText = "Dados incorretos ou erro no Firebase.";
                 errorDiv.classList.remove('hidden');
+            }
+        });
+
+        // Configurações Form
+        const settingsForm = document.getElementById('settings-form');
+        settingsForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = settingsForm.querySelector('button');
+            btn.innerText = "Salvando...";
+            btn.disabled = true;
+
+            const newPhone = document.getElementById('setting-phone').value.replace(/\D/g, ''); // Remove não-números
+
+            try {
+                // Salva na coleção settings, documento config
+                await setDoc(settingsDoc, { whatsapp: newPhone }, { merge: true });
+                showToast("Configurações salvas!");
+                document.getElementById('settings-modal').classList.add('hidden');
+            } catch (error) {
+                console.error(error);
+                showToast("Erro: Verifique as regras do Firebase.", true);
+            } finally {
+                btn.innerText = "Salvar Configurações";
+                btn.disabled = false;
             }
         });
 
@@ -528,7 +574,7 @@
             }
         });
 
-        // Firestore Realtime
+        // Firestore Realtime - Produtos
         const q = query(productsCol, orderBy("name"));
         onSnapshot(collection(db, "products"), (snapshot) => {
             products = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -536,10 +582,23 @@
             renderAdminTable();
             document.getElementById('loading-spinner').classList.add('hidden');
         }, (error) => {
-            console.error("Erro:", error);
+            console.error("Erro Produtos:", error);
         });
 
-        // Salvar Produto
+        // Firestore Realtime - Configurações
+        onSnapshot(settingsDoc, (docSnap) => {
+            if (docSnap.exists()) {
+                const data = docSnap.data();
+                if(data.whatsapp) {
+                    storePhone = data.whatsapp;
+                    // Atualiza botão flutuante
+                    // Não precisa atualizar nada visualmente além do botão flutuante se houver texto, mas aqui é só link
+                }
+            }
+        }, (error) => {
+            console.log("Aguardando configurações...");
+        });
+
         const productForm = document.getElementById('product-form');
         productForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -548,8 +607,6 @@
             btn.disabled = true;
 
             const id = document.getElementById('prod-id').value;
-            
-            // Define imagem final (Base64 do arquivo OU URL digitada OU mantém a antiga)
             let finalImage = currentImageBase64; 
             if(!finalImage) finalImage = 'https://via.placeholder.com/300/121212/FFFFFF?text=CH+Cell';
 
@@ -558,7 +615,7 @@
                 price: parseFloat(document.getElementById('prod-price').value),
                 image: finalImage,
                 description: document.getElementById('prod-desc').value,
-                buyLink: document.getElementById('prod-buy-link').value || '', // Novo campo
+                buyLink: document.getElementById('prod-buy-link').value || '',
                 updatedAt: new Date()
             };
 
@@ -574,7 +631,7 @@
                 document.getElementById('product-modal').classList.add('hidden');
             } catch (error) {
                 console.error("Erro ao salvar:", error);
-                showToast("Erro ao salvar. Você é o admin?", true);
+                showToast("Erro ao salvar. Verifique permissões.", true);
             } finally {
                 btn.innerText = "Salvar Produto";
                 btn.disabled = false;
