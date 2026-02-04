@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CH Celulares | Premium Store</title>
+    <title>CH Celulares | Especialista em Apple e Smartphones</title>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -13,326 +13,486 @@
             theme: {
                 extend: {
                     colors: {
-                        dark: {
-                            900: '#0a0a0a',
-                            800: '#121212',
-                            700: '#1e1e1e',
-                            600: '#2d2d2d'
-                        }
+                        brand: { 500: '#3B82F6', 600: '#2563EB' },
+                        dark: { 900: '#050505', 800: '#0f0f0f', 700: '#1a1a1a', 600: '#262626' },
+                        success: '#10B981',
+                        warning: '#F59E0B'
                     },
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                    }
+                    fontFamily: { sans: ['Inter', 'sans-serif'] }
                 }
             }
         }
     </script>
     
-    <!-- Ícones -->
+    <!-- Ícones e Fontes -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #050505; color: #ffffff; }
+        body { font-family: 'Inter', sans-serif; background-color: #050505; color: #f3f4f6; }
         
-        /* Glassmorphism Effect */
-        .glass {
-            background: rgba(18, 18, 18, 0.7);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-        }
+        /* Elementos de Vidro e UI */
+        .glass { background: rgba(15, 15, 15, 0.85); backdrop-filter: blur(16px); border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .card-glass { background: #121212; border: 1px solid #262626; }
         
-        .glass-card {
-            background: rgba(30, 30, 30, 0.6);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-        }
+        /* Badges de Condição */
+        .badge-novo { background: #10B981; color: white; }
+        .badge-vitrine { background: #3B82F6; color: white; }
+        .badge-usado { background: #F59E0B; color: black; }
 
-        .product-card { transition: all 0.4s ease; }
-        .product-card:hover {
-            transform: translateY(-8px);
-            border-color: rgba(59, 130, 246, 0.5);
-            box-shadow: 0 0 20px rgba(59, 130, 246, 0.15);
-        }
-
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #0a0a0a; }
-        ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #444; }
-
-        .loader {
-            border-top-color: #3B82F6;
-            animation: spinner 1.5s linear infinite;
-        }
-        @keyframes spinner { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        /* Animações */
+        .hover-lift { transition: transform 0.2s ease, box-shadow 0.2s ease; }
+        .hover-lift:hover { transform: translateY(-4px); box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
         
-        .text-gradient {
-            background: linear-gradient(to right, #60a5fa, #a78bfa);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #050505; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+
+        /* Carrinho Lateral */
+        #cart-drawer { transition: transform 0.3s ease-in-out; }
+        .drawer-open { transform: translateX(0) !important; }
+        .drawer-closed { transform: translateX(100%) !important; }
+
+        .loader { border-top-color: #3B82F6; animation: spinner 1s linear infinite; }
+        @keyframes spinner { to { transform: rotate(360deg); } }
     </style>
 </head>
-<body class="antialiased min-h-screen flex flex-col">
+<body class="antialiased min-h-screen flex flex-col overflow-x-hidden">
 
     <!-- Navegação -->
-    <nav class="glass fixed w-full top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-20 items-center">
-                <div class="flex items-center cursor-pointer group" onclick="app.showHome()">
-                    <div class="bg-blue-600/20 p-2 rounded-lg mr-3 group-hover:bg-blue-600/30 transition">
-                        <i class="fa-solid fa-mobile-screen-button text-blue-500 text-xl"></i>
-                    </div>
-                    <span class="font-bold text-2xl tracking-tight text-white">CH <span class="text-blue-500">Celulares</span></span>
+    <nav class="glass fixed w-full top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 h-16 flex justify-between items-center">
+            <!-- Logo -->
+            <div class="flex items-center cursor-pointer gap-2" onclick="app.showHome()">
+                <div class="bg-brand-600/20 p-2 rounded-lg">
+                    <i class="fa-solid fa-mobile-screen text-brand-500"></i>
                 </div>
-                <div class="flex items-center space-x-6">
-                    <button onclick="app.toggleAdminModal()" id="adminBtn" class="text-sm font-medium text-gray-400 hover:text-white transition flex items-center gap-2">
-                        <i class="fa-solid fa-lock text-xs"></i> Área Admin
-                    </button>
-                    <button onclick="app.logout()" id="logoutBtn" class="hidden text-sm font-medium text-red-400 hover:text-red-300 transition flex items-center gap-2 border border-red-900/30 px-3 py-1.5 rounded-full bg-red-500/10">
-                        Sair <i class="fa-solid fa-right-from-bracket"></i>
-                    </button>
+                <div>
+                    <h1 class="font-bold text-xl tracking-tight leading-none text-white">CH <span class="text-brand-500">Celulares</span></h1>
+                    <span class="text-[10px] text-gray-400 uppercase tracking-widest">Premium Store</span>
                 </div>
+            </div>
+
+            <!-- Ações -->
+            <div class="flex items-center gap-4">
+                <!-- Botão Carrinho -->
+                <button onclick="app.toggleCart()" class="relative p-2 text-gray-300 hover:text-white transition">
+                    <i class="fa-solid fa-cart-shopping text-xl"></i>
+                    <span id="cart-count" class="absolute -top-1 -right-1 bg-brand-600 text-white text-[10px] font-bold h-5 w-5 flex items-center justify-center rounded-full hidden">0</span>
+                </button>
+
+                <!-- Menu Admin (Só aparece se logado) -->
+                <button onclick="app.toggleAdminModal()" id="adminBtn" class="text-xs font-medium text-gray-500 hover:text-white flex items-center gap-1 border border-white/10 px-3 py-1.5 rounded-full">
+                    <i class="fa-solid fa-lock"></i> <span class="hidden sm:inline">Admin</span>
+                </button>
             </div>
         </div>
     </nav>
 
-    <!-- App Container -->
-    <div id="app-container" class="pt-20 flex-grow">
+    <!-- Drawer do Carrinho -->
+    <div id="cart-overlay" onclick="app.toggleCart()" class="fixed inset-0 bg-black/60 z-50 hidden backdrop-blur-sm"></div>
+    <div id="cart-drawer" class="fixed top-0 right-0 h-full w-full max-w-md bg-dark-800 z-[60] shadow-2xl drawer-closed border-l border-white/10 flex flex-col">
+        <div class="p-5 border-b border-white/10 flex justify-between items-center bg-dark-900">
+            <h2 class="text-lg font-bold"><i class="fa-solid fa-bag-shopping mr-2 text-brand-500"></i>Seu Carrinho</h2>
+            <button onclick="app.toggleCart()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
+        </div>
         
-        <!-- Hero Section -->
-        <div id="hero-section" class="relative overflow-hidden">
-            <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[500px] bg-blue-600/20 rounded-full blur-[120px] -z-10 opacity-50"></div>
-            
-            <div class="max-w-7xl mx-auto px-4 py-24 sm:px-6 lg:px-8 relative z-10">
-                <div class="text-center max-w-3xl mx-auto">
-                    <span class="inline-block py-1 px-3 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-sm font-semibold mb-6 tracking-wide uppercase">
-                        Novos Lançamentos
-                    </span>
-                    <h1 class="text-5xl md:text-7xl font-bold tracking-tight mb-6 leading-tight">
-                        Tecnologia <br><span class="text-gradient">Premium</span>
+        <div id="cart-items" class="flex-1 overflow-y-auto p-5 space-y-4">
+            <!-- Itens do carrinho via JS -->
+            <div class="text-center py-10 text-gray-500">
+                <i class="fa-solid fa-cart-arrow-down text-4xl mb-3 opacity-30"></i>
+                <p>Seu carrinho está vazio.</p>
+            </div>
+        </div>
+
+        <div class="p-5 bg-dark-900 border-t border-white/10">
+            <div class="flex justify-between mb-4 text-sm">
+                <span class="text-gray-400">Subtotal</span>
+                <span id="cart-total" class="font-bold text-white">R$ 0,00</span>
+            </div>
+            <button onclick="app.goToCheckout()" class="w-full bg-brand-600 hover:bg-brand-500 text-white py-3 rounded-lg font-bold transition flex items-center justify-center gap-2">
+                Finalizar Compra <i class="fa-solid fa-arrow-right"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Conteúdo Principal -->
+    <div id="app-container" class="pt-16 flex-grow">
+        
+        <!-- Hero: Troca e Confiança -->
+        <div class="bg-gradient-to-b from-dark-800 to-dark-900 border-b border-white/5 py-12">
+            <div class="max-w-7xl mx-auto px-4 grid md:grid-cols-2 gap-8 items-center">
+                <div>
+                    <span class="inline-block px-3 py-1 bg-brand-500/10 text-brand-400 rounded-full text-xs font-bold mb-4 border border-brand-500/20">🚀 COMPRA • VENDA • TROCA</span>
+                    <h1 class="text-4xl md:text-5xl font-extrabold text-white mb-4 leading-tight">
+                        Seu smartphone novo <br> com <span class="text-brand-500">procedência garantida</span>.
                     </h1>
-                    <p class="text-xl text-gray-400 mb-10 leading-relaxed">
-                        A melhor seleção de smartphones topo de linha. Garantia, procedência e a exclusividade que você merece.
-                    </p>
-                    <div class="flex justify-center gap-4">
-                        <a href="#produtos" class="bg-blue-600 text-white px-8 py-4 rounded-full font-semibold shadow-[0_0_20px_rgba(37,99,235,0.3)] hover:bg-blue-500 transition-all transform hover:-translate-y-1">
-                            Ver Coleção
-                        </a>
-                        <button onclick="app.contactWhatsApp()" class="glass text-white px-8 py-4 rounded-full font-semibold hover:bg-white/10 transition-all border border-white/10 flex items-center gap-2">
-                            <i class="fa-brands fa-whatsapp"></i> WhatsApp
-                        </button>
+                    <p class="text-gray-400 mb-6 text-lg">Aceitamos seu iPhone usado como parte do pagamento. Garantia de 90 dias em todos os aparelhos.</p>
+                    <div class="flex gap-3">
+                        <a href="#produtos" class="bg-brand-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-brand-500 transition">Ver Estoque</a>
+                        <button onclick="app.contactWhatsApp('Avaliação')" class="bg-dark-700 text-white px-6 py-3 rounded-lg font-bold hover:bg-dark-600 transition border border-white/10">Avaliar meu Usado</button>
                     </div>
+                </div>
+                
+                <!-- Cards de Confiança -->
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="card-glass p-4 rounded-xl">
+                        <i class="fa-solid fa-shield-halved text-2xl text-green-500 mb-2"></i>
+                        <h3 class="font-bold text-sm">Garantia Real</h3>
+                        <p class="text-xs text-gray-500">90 dias com suporte direto.</p>
+                    </div>
+                    <div class="card-glass p-4 rounded-xl">
+                        <i class="fa-solid fa-file-invoice text-2xl text-blue-500 mb-2"></i>
+                        <h3 class="font-bold text-sm">Transparência</h3>
+                        <p class="text-xs text-gray-500">Procedência verificada.</p>
+                    </div>
+                    <div class="card-glass p-4 rounded-xl">
+                        <i class="fa-brands fa-pix text-2xl text-teal-400 mb-2"></i>
+                        <h3 class="font-bold text-sm">Desconto no Pix</h3>
+                        <p class="text-xs text-gray-500">5% OFF à vista.</p>
+                    </div>
+                    <div class="card-glass p-4 rounded-xl">
+                        <i class="fa-solid fa-truck-fast text-2xl text-orange-400 mb-2"></i>
+                        <h3 class="font-bold text-sm">Entrega Rápida</h3>
+                        <p class="text-xs text-gray-500">Motoboy ou Correios.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filtros e Busca -->
+        <div class="sticky top-16 bg-dark-900/90 backdrop-blur-md z-30 border-b border-white/5 py-3">
+            <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row gap-4 justify-between items-center">
+                <div class="flex gap-2 overflow-x-auto w-full sm:w-auto pb-2 sm:pb-0 no-scrollbar">
+                    <button onclick="app.filterProducts('all')" class="px-4 py-1.5 rounded-full text-sm font-medium bg-white text-black hover:bg-gray-200 transition whitespace-nowrap">Todos</button>
+                    <button onclick="app.filterProducts('iPhone')" class="px-4 py-1.5 rounded-full text-sm font-medium bg-dark-700 hover:bg-dark-600 transition whitespace-nowrap border border-white/10">iPhones</button>
+                    <button onclick="app.filterProducts('Android')" class="px-4 py-1.5 rounded-full text-sm font-medium bg-dark-700 hover:bg-dark-600 transition whitespace-nowrap border border-white/10">Android</button>
+                    <button onclick="app.filterProducts('Acessorio')" class="px-4 py-1.5 rounded-full text-sm font-medium bg-dark-700 hover:bg-dark-600 transition whitespace-nowrap border border-white/10">Acessórios</button>
+                </div>
+                <div class="relative w-full sm:w-64">
+                    <i class="fa-solid fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-xs"></i>
+                    <input type="text" id="search-input" oninput="app.searchProducts(this.value)" placeholder="Buscar modelo..." class="w-full bg-dark-800 border border-dark-600 rounded-full pl-9 pr-4 py-1.5 text-sm focus:border-brand-500 focus:outline-none transition text-white">
                 </div>
             </div>
         </div>
 
         <!-- Lista de Produtos -->
-        <div id="produtos" class="max-w-7xl mx-auto px-4 py-16 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between mb-12 border-b border-white/10 pb-6">
-                <div>
-                    <h2 class="text-3xl font-bold text-white">Catálogo</h2>
-                    <p class="mt-1 text-gray-500">Disponível para entrega imediata</p>
+        <div id="produtos" class="max-w-7xl mx-auto px-4 py-12 min-h-[50vh]">
+            <div id="loading-spinner" class="flex flex-col items-center justify-center py-20">
+                <div class="loader ease-linear rounded-full border-4 border-t-4 border-dark-600 h-10 w-10 mb-4"></div>
+                <p class="text-gray-500 text-sm">Carregando estoque...</p>
+            </div>
+            <div id="product-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
+        </div>
+
+        <!-- Seção de Serviços -->
+        <div class="bg-dark-800 border-y border-white/5 py-16">
+            <div class="max-w-7xl mx-auto px-4 text-center">
+                <h2 class="text-2xl font-bold mb-8">Nossos Serviços</h2>
+                <div class="grid md:grid-cols-3 gap-6">
+                    <div class="p-6 rounded-xl bg-dark-700 border border-white/5 hover:border-brand-500/30 transition">
+                        <div class="w-12 h-12 rounded-full bg-blue-500/10 flex items-center justify-center mx-auto mb-4 text-blue-400 text-xl"><i class="fa-solid fa-screwdriver-wrench"></i></div>
+                        <h3 class="font-bold mb-2">Assistência Técnica</h3>
+                        <p class="text-sm text-gray-400">Troca de tela, bateria e reparos avançados com garantia.</p>
+                    </div>
+                    <div class="p-6 rounded-xl bg-dark-700 border border-white/5 hover:border-brand-500/30 transition">
+                        <div class="w-12 h-12 rounded-full bg-green-500/10 flex items-center justify-center mx-auto mb-4 text-green-400 text-xl"><i class="fa-solid fa-rotate"></i></div>
+                        <h3 class="font-bold mb-2">Trade-In</h3>
+                        <p class="text-sm text-gray-400">Seu usado vale desconto na compra de um novo.</p>
+                    </div>
+                    <div class="p-6 rounded-xl bg-dark-700 border border-white/5 hover:border-brand-500/30 transition">
+                        <div class="w-12 h-12 rounded-full bg-purple-500/10 flex items-center justify-center mx-auto mb-4 text-purple-400 text-xl"><i class="fa-solid fa-headset"></i></div>
+                        <h3 class="font-bold mb-2">Suporte Pós-Venda</h3>
+                        <p class="text-sm text-gray-400">Ajuda para configurar seu aparelho e transferir dados.</p>
+                    </div>
                 </div>
             </div>
-
-            <!-- Loader -->
-            <div id="loading-spinner" class="flex flex-col items-center justify-center my-20">
-                <div class="loader ease-linear rounded-full border-4 border-t-4 border-gray-700 h-12 w-12 mb-4"></div>
-                <p class="text-gray-500 text-sm animate-pulse">Carregando catálogo...</p>
-            </div>
-
-            <!-- Grid -->
-            <div id="product-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-                <!-- Produtos via JS -->
-            </div>
         </div>
-        
-        <footer class="border-t border-white/5 py-12 mt-12 bg-black/40">
-            <div class="max-w-7xl mx-auto px-4 text-center">
-                <p class="text-gray-600 text-sm">© 2024 CH Celulares.</p>
+
+        <!-- Footer -->
+        <footer class="bg-dark-900 border-t border-white/5 pt-16 pb-8">
+            <div class="max-w-7xl mx-auto px-4 grid md:grid-cols-4 gap-8 mb-12">
+                <div class="col-span-1 md:col-span-2">
+                    <h2 class="font-bold text-xl mb-4 text-white">CH Celulares</h2>
+                    <p class="text-gray-500 text-sm max-w-xs mb-4">Sua loja de confiança para produtos Apple e smartphones premium. Qualidade, preço justo e transparência.</p>
+                    <div class="flex gap-4">
+                        <a href="#" class="text-gray-400 hover:text-brand-500"><i class="fa-brands fa-instagram text-xl"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-brand-500"><i class="fa-brands fa-facebook text-xl"></i></a>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="font-bold text-white mb-4">Informações</h3>
+                    <ul class="space-y-2 text-sm text-gray-500">
+                        <li><a href="#" class="hover:text-brand-500">Política de Garantia</a></li>
+                        <li><a href="#" class="hover:text-brand-500">Trocas e Devoluções</a></li>
+                        <li><a href="#" class="hover:text-brand-500">Sobre Nós</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="font-bold text-white mb-4">Contato</h3>
+                    <ul class="space-y-2 text-sm text-gray-500">
+                        <li><i class="fa-brands fa-whatsapp mr-2"></i> (11) 99999-9999</li>
+                        <li><i class="fa-solid fa-location-dot mr-2"></i> Rua Exemplo, 123 - Centro</li>
+                        <li><i class="fa-solid fa-id-card mr-2"></i> CNPJ: 00.000.000/0001-00</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="max-w-7xl mx-auto px-4 border-t border-white/5 pt-8 text-center text-xs text-gray-600">
+                <p>&copy; 2024 CH Celulares. Todos os direitos reservados.</p>
             </div>
         </footer>
     </div>
 
-    <!-- Admin: Modal de Login -->
-    <div id="login-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/80 backdrop-blur-sm">
-        <div class="glass-card rounded-2xl shadow-2xl p-8 max-w-md w-full m-4 border border-white/10 relative overflow-hidden">
-            <div class="flex justify-between items-center mb-8">
-                <h3 class="text-2xl font-bold text-white">Acesso Admin</h3>
-                <button onclick="app.closeModal('login-modal')" class="text-gray-400 hover:text-white transition"><i class="fa-solid fa-times text-xl"></i></button>
+    <!-- MODAL DE CHECKOUT -->
+    <div id="checkout-modal" class="fixed inset-0 z-[70] hidden flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+        <div class="bg-dark-800 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto border border-white/10">
+            <div class="p-6 border-b border-white/10 flex justify-between items-center sticky top-0 bg-dark-800 z-10">
+                <h3 class="text-xl font-bold text-white">Finalizar Pedido</h3>
+                <button onclick="app.closeModal('checkout-modal')" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
             </div>
             
-            <form id="login-form" class="space-y-5">
-                <div>
-                    <label class="block text-xs font-medium text-gray-400 uppercase tracking-wider mb-2">Email</label>
-                    <input type="email" id="email" class="block w-full rounded-xl bg-dark-800 border-gray-700 text-white shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:bg-dark-700 transition p-3 outline-none border" required>
+            <form id="checkout-form" class="p-6 space-y-6">
+                <!-- Resumo -->
+                <div class="bg-dark-700/50 p-4 rounded-xl border border-white/5">
+                    <h4 class="font-bold text-sm mb-2 text-gray-300">Resumo da Compra</h4>
+                    <div id="checkout-summary" class="text-sm text-gray-400 space-y-1 mb-3"></div>
+                    <div class="flex justify-between font-bold text-white border-t border-white/10 pt-2">
+                        <span>Total a Pagar:</span>
+                        <span id="checkout-total" class="text-brand-400">R$ 0,00</span>
+                    </div>
                 </div>
-                <div>
-                    <label class="block text-xs font-medium text-gray-400 uppercase tracking-wider mb-2">Senha</label>
-                    <input type="password" id="password" class="block w-full rounded-xl bg-dark-800 border-gray-700 text-white shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:bg-dark-700 transition p-3 outline-none border" required>
+
+                <!-- Dados Pessoais -->
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs text-gray-500 mb-1">Seu Nome</label>
+                        <input type="text" id="cust-name" class="w-full bg-dark-900 border border-dark-600 rounded-lg p-3 text-white focus:border-brand-500 outline-none" required>
+                    </div>
+                    <div>
+                        <label class="block text-xs text-gray-500 mb-1">Telefone/WhatsApp</label>
+                        <input type="tel" id="cust-phone" class="w-full bg-dark-900 border border-dark-600 rounded-lg p-3 text-white focus:border-brand-500 outline-none" required>
+                    </div>
                 </div>
-                <div id="login-error" class="text-red-400 text-sm hidden bg-red-900/20 p-3 rounded-lg border border-red-900/30"></div>
-                <button type="submit" class="w-full bg-blue-600 text-white py-3.5 px-4 rounded-xl hover:bg-blue-500 font-semibold shadow-lg shadow-blue-900/30 transition transform hover:scale-[1.02]">
-                    Entrar
+
+                <!-- Entrega -->
+                <div>
+                    <label class="block text-xs text-gray-500 mb-2">Opção de Entrega</label>
+                    <div class="grid grid-cols-2 gap-4 mb-4">
+                        <label class="cursor-pointer">
+                            <input type="radio" name="delivery" value="retirada" class="peer hidden" checked onchange="app.toggleAddress(false)">
+                            <div class="p-4 rounded-xl bg-dark-900 border border-dark-600 peer-checked:border-brand-500 peer-checked:bg-brand-500/10 transition text-center">
+                                <i class="fa-solid fa-store mb-2 text-xl"></i>
+                                <div class="text-sm font-bold">Retirar na Loja</div>
+                                <div class="text-xs text-gray-500">Grátis</div>
+                            </div>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="delivery" value="entrega" class="peer hidden" onchange="app.toggleAddress(true)">
+                            <div class="p-4 rounded-xl bg-dark-900 border border-dark-600 peer-checked:border-brand-500 peer-checked:bg-brand-500/10 transition text-center">
+                                <i class="fa-solid fa-motorcycle mb-2 text-xl"></i>
+                                <div class="text-sm font-bold">Entrega</div>
+                                <div class="text-xs text-gray-500">A combinar</div>
+                            </div>
+                        </label>
+                    </div>
+
+                    <div id="address-fields" class="hidden space-y-4 border-l-2 border-dark-600 pl-4">
+                        <input type="text" id="cust-address" placeholder="Endereço Completo (Rua, Número, Bairro)" class="w-full bg-dark-900 border border-dark-600 rounded-lg p-3 text-white focus:border-brand-500 outline-none">
+                        <input type="text" id="cust-city" placeholder="Cidade" class="w-full bg-dark-900 border border-dark-600 rounded-lg p-3 text-white focus:border-brand-500 outline-none">
+                    </div>
+                </div>
+
+                <!-- Pagamento -->
+                <div>
+                    <label class="block text-xs text-gray-500 mb-2">Forma de Pagamento</label>
+                    <select id="cust-payment" class="w-full bg-dark-900 border border-dark-600 rounded-lg p-3 text-white focus:border-brand-500 outline-none">
+                        <option value="Pix">Pix (5% de Desconto)</option>
+                        <option value="Cartão de Crédito">Cartão de Crédito (até 12x)</option>
+                        <option value="Dinheiro">Dinheiro (Na retirada)</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="w-full bg-green-600 hover:bg-green-500 text-white py-4 rounded-xl font-bold text-lg shadow-lg flex items-center justify-center gap-2 transition transform active:scale-95">
+                    <i class="fa-brands fa-whatsapp text-2xl"></i> Enviar Pedido
                 </button>
+                <p class="text-center text-xs text-gray-500">Você será redirecionado para o WhatsApp para confirmar.</p>
             </form>
         </div>
     </div>
 
-    <!-- Admin: Dashboard -->
-    <div id="admin-panel" class="hidden bg-dark-900 min-h-screen pt-24 pb-20">
-        <div class="max-w-7xl mx-auto px-4">
-            <div class="flex flex-col md:flex-row justify-between items-center mb-10 gap-4">
-                <div>
-                    <h2 class="text-3xl font-bold text-white">Gerenciar Estoque</h2>
-                    <p class="text-gray-500 mt-1">Bem-vindo, Carlos</p>
-                </div>
-                <div class="flex gap-3">
-                    <button onclick="app.showSettingsModal()" class="bg-dark-800 text-gray-300 px-4 py-3 rounded-xl hover:bg-dark-700 hover:text-white shadow-lg border border-white/10 flex items-center transition">
-                        <i class="fa-solid fa-gear mr-2"></i> Configurar Loja
-                    </button>
-                    <button onclick="app.showAddProductModal()" class="bg-green-600 text-white px-6 py-3 rounded-xl hover:bg-green-500 shadow-lg shadow-green-900/20 flex items-center transition border border-green-500/20">
-                        <i class="fa-solid fa-plus mr-2"></i> Adicionar Produto
-                    </button>
-                </div>
+    <!-- Admin: Painéis (Login e CRUD) -->
+    <!-- (Mantive a estrutura funcional do anterior, mas com o design novo e campos novos) -->
+    <div id="login-modal" class="fixed inset-0 z-[80] hidden flex items-center justify-center bg-black/90 backdrop-blur-sm p-4">
+        <div class="bg-dark-800 rounded-2xl p-8 max-w-sm w-full border border-white/10">
+            <div class="flex justify-between mb-6">
+                <h3 class="text-xl font-bold">Admin Login</h3>
+                <button onclick="app.closeModal('login-modal')" class="text-gray-500"><i class="fa-solid fa-xmark"></i></button>
             </div>
-
-            <div class="glass-card rounded-2xl overflow-hidden border border-white/5">
-                <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-800">
-                        <thead class="bg-dark-800/50">
-                            <tr>
-                                <th class="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Produto</th>
-                                <th class="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Preço</th>
-                                <th class="px-6 py-4 text-right text-xs font-medium text-gray-400 uppercase tracking-wider">Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody id="admin-product-list" class="divide-y divide-gray-800/50">
-                            <!-- Lista Admin -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            
-            <button onclick="app.hideAdminPanel()" class="mt-8 text-gray-400 hover:text-white flex items-center gap-2 transition group">
-                <i class="fa-solid fa-arrow-left group-hover:-translate-x-1 transition"></i> Voltar para a Loja
-            </button>
+            <form id="login-form" class="space-y-4">
+                <input type="email" id="email" placeholder="Email" class="w-full bg-dark-900 p-3 rounded-lg border border-dark-600 text-white" required>
+                <input type="password" id="password" placeholder="Senha" class="w-full bg-dark-900 p-3 rounded-lg border border-dark-600 text-white" required>
+                <p id="login-error" class="text-red-500 text-xs hidden"></p>
+                <button type="submit" class="w-full bg-brand-600 text-white py-3 rounded-lg font-bold">Entrar</button>
+            </form>
         </div>
     </div>
 
-    <!-- Modal Adicionar/Editar Produto -->
-    <div id="product-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/80 backdrop-blur-sm">
-        <div class="glass-card rounded-2xl shadow-2xl p-6 md:p-8 max-w-lg w-full m-4 max-h-[90vh] overflow-y-auto border border-white/10">
-            <div class="flex justify-between items-center mb-6">
-                <h3 class="text-2xl font-bold text-white" id="modal-title">Adicionar Produto</h3>
-                <button onclick="app.closeModal('product-modal')" class="text-gray-400 hover:text-white transition"><i class="fa-solid fa-times text-xl"></i></button>
+    <!-- Admin Dashboard Completo -->
+    <div id="admin-panel" class="fixed inset-0 z-[60] hidden bg-dark-900 overflow-y-auto">
+        <div class="max-w-7xl mx-auto px-4 py-8">
+            <div class="flex justify-between items-center mb-8">
+                <h2 class="text-2xl font-bold">Painel de Controle</h2>
+                <button onclick="app.hideAdminPanel()" class="text-gray-400 hover:text-white flex gap-2 items-center"><i class="fa-solid fa-arrow-left"></i> Voltar</button>
             </div>
-            <form id="product-form" class="space-y-4">
+
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                <div class="bg-dark-800 p-6 rounded-xl border border-white/5">
+                    <h3 class="text-gray-400 text-sm">Total Produtos</h3>
+                    <p class="text-2xl font-bold text-white" id="admin-total-prods">0</p>
+                </div>
+                <!-- Botões de Ação -->
+                <button onclick="app.showAddProductModal()" class="bg-green-600 hover:bg-green-500 text-white p-6 rounded-xl font-bold flex flex-col items-center justify-center gap-2 transition">
+                    <i class="fa-solid fa-plus text-2xl"></i> Adicionar Produto
+                </button>
+                <button onclick="app.showSettingsModal()" class="bg-dark-700 hover:bg-dark-600 text-white p-6 rounded-xl font-bold flex flex-col items-center justify-center gap-2 border border-white/10 transition">
+                    <i class="fa-solid fa-gear text-2xl"></i> Configurações
+                </button>
+                <button onclick="app.logout()" class="bg-red-900/50 hover:bg-red-900 text-red-200 p-6 rounded-xl font-bold flex flex-col items-center justify-center gap-2 border border-red-500/20 transition">
+                    <i class="fa-solid fa-right-from-bracket text-2xl"></i> Sair
+                </button>
+            </div>
+
+            <div class="bg-dark-800 rounded-xl border border-white/5 overflow-hidden">
+                <table class="w-full text-left border-collapse">
+                    <thead class="bg-dark-700 text-gray-400 text-xs uppercase">
+                        <tr>
+                            <th class="p-4">Produto</th>
+                            <th class="p-4">Preço</th>
+                            <th class="p-4">Estoque</th>
+                            <th class="p-4 text-right">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="admin-product-list" class="divide-y divide-white/5 text-sm"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Produto (Novo Campos) -->
+    <div id="product-modal" class="fixed inset-0 z-[90] hidden flex items-center justify-center bg-black/90 backdrop-blur-sm p-4">
+        <div class="bg-dark-800 rounded-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto border border-white/10 p-6">
+            <div class="flex justify-between mb-6">
+                <h3 class="text-xl font-bold" id="modal-title">Produto</h3>
+                <button onclick="app.closeModal('product-modal')" class="text-gray-500"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form id="product-form" class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <input type="hidden" id="prod-id">
                 
-                <!-- Nome -->
-                <div>
-                    <label class="block text-xs font-medium text-gray-400 uppercase tracking-wider mb-1">Modelo</label>
-                    <input type="text" id="prod-name" placeholder="Ex: iPhone 15 Pro" class="block w-full rounded-xl bg-dark-800 border-gray-700 text-white focus:border-blue-500 border p-3 outline-none" required>
-                </div>
-                
-                <!-- Preço -->
-                <div>
-                    <label class="block text-xs font-medium text-gray-400 uppercase tracking-wider mb-1">Preço (R$)</label>
-                    <input type="number" step="0.01" id="prod-price" placeholder="Ex: 5000.00" class="block w-full rounded-xl bg-dark-800 border-gray-700 text-white focus:border-blue-500 border p-3 outline-none" required>
+                <!-- Básico -->
+                <div class="md:col-span-2">
+                    <label class="text-xs text-gray-500">Nome do Modelo</label>
+                    <input type="text" id="prod-name" class="w-full bg-dark-900 border border-dark-600 rounded-lg p-3 text-white" required>
                 </div>
 
-                <!-- Link de Pagamento -->
                 <div>
-                    <label class="block text-xs font-medium text-gray-400 uppercase tracking-wider mb-1">Link de Compra/Pagamento (Opcional)</label>
-                    <input type="url" id="prod-buy-link" placeholder="Ex: Link do MercadoPago, Shopee ou Site" class="block w-full rounded-xl bg-dark-800 border-gray-700 text-white focus:border-blue-500 border p-3 outline-none">
-                    <p class="text-xs text-gray-600 mt-1">Se vazio, o botão abrirá o WhatsApp.</p>
+                    <label class="text-xs text-gray-500">Preço (R$)</label>
+                    <input type="number" step="0.01" id="prod-price" class="w-full bg-dark-900 border border-dark-600 rounded-lg p-3 text-white" required>
+                </div>
+
+                <div>
+                    <label class="text-xs text-gray-500">Categoria</label>
+                    <select id="prod-category" class="w-full bg-dark-900 border border-dark-600 rounded-lg p-3 text-white">
+                        <option value="iPhone">iPhone</option>
+                        <option value="Android">Android</option>
+                        <option value="Acessorio">Acessório</option>
+                    </select>
+                </div>
+
+                <!-- Detalhes Técnicos (Novos) -->
+                <div>
+                    <label class="text-xs text-gray-500">Condição</label>
+                    <select id="prod-condition" class="w-full bg-dark-900 border border-dark-600 rounded-lg p-3 text-white">
+                        <option value="Novo">Novo (Lacrado)</option>
+                        <option value="Vitrine">Vitrine (Impecável)</option>
+                        <option value="Usado">Seminovo (Bom estado)</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="text-xs text-gray-500">Armazenamento (GB)</label>
+                    <input type="text" id="prod-storage" placeholder="Ex: 128GB" class="w-full bg-dark-900 border border-dark-600 rounded-lg p-3 text-white">
+                </div>
+
+                <div>
+                    <label class="text-xs text-gray-500">Saúde da Bateria (%)</label>
+                    <input type="text" id="prod-battery" placeholder="Ex: 100% ou N/A" class="w-full bg-dark-900 border border-dark-600 rounded-lg p-3 text-white">
+                </div>
+
+                <div>
+                    <label class="text-xs text-gray-500">Cor</label>
+                    <input type="text" id="prod-color" placeholder="Ex: Azul Sierra" class="w-full bg-dark-900 border border-dark-600 rounded-lg p-3 text-white">
                 </div>
 
                 <!-- Imagem -->
-                <div>
-                    <label class="block text-xs font-medium text-gray-400 uppercase tracking-wider mb-1">Imagem do Produto</label>
-                    
-                    <!-- Abas para escolher tipo de upload -->
-                    <div class="flex gap-4 mb-2 text-sm">
-                        <button type="button" onclick="app.toggleImageInput('file')" id="btn-file" class="text-blue-400 font-bold border-b border-blue-400 pb-1">Enviar Arquivo</button>
-                        <button type="button" onclick="app.toggleImageInput('url')" id="btn-url" class="text-gray-500 hover:text-white pb-1">Usar Link</button>
-                    </div>
-
-                    <!-- Input Arquivo -->
-                    <div id="input-file-container">
-                        <input type="file" id="prod-image-file" accept="image/*" class="block w-full text-sm text-gray-400
-                            file:mr-4 file:py-2 file:px-4
-                            file:rounded-full file:border-0
-                            file:text-sm file:font-semibold
-                            file:bg-blue-600 file:text-white
-                            hover:file:bg-blue-700 mb-2">
-                        <p class="text-xs text-gray-600">A imagem será otimizada automaticamente.</p>
-                    </div>
-
-                    <!-- Input URL -->
-                    <div id="input-url-container" class="hidden">
-                        <input type="url" id="prod-image-url" placeholder="https://..." class="block w-full rounded-xl bg-dark-800 border-gray-700 text-white focus:border-blue-500 border p-3 outline-none">
-                    </div>
-
-                    <!-- Preview -->
-                    <div class="mt-2 h-24 w-24 rounded-lg border border-gray-700 overflow-hidden bg-black flex items-center justify-center">
-                        <img id="image-preview" src="https://via.placeholder.com/100?text=Preview" class="max-h-full max-w-full object-contain">
+                <div class="md:col-span-2 border-t border-white/5 pt-4">
+                    <label class="text-xs text-gray-500 mb-2 block">Foto do Produto</label>
+                    <div class="flex gap-4">
+                        <div class="h-24 w-24 bg-black rounded-lg border border-dark-600 flex items-center justify-center overflow-hidden">
+                            <img id="image-preview" src="" class="max-h-full max-w-full">
+                        </div>
+                        <div class="flex-1 space-y-2">
+                            <input type="file" id="prod-image-file" class="text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:bg-brand-600 file:text-white file:border-0">
+                            <input type="text" id="prod-image-url" placeholder="Ou cole URL da imagem" class="w-full bg-dark-900 border border-dark-600 rounded-lg p-2 text-xs text-white">
+                        </div>
                     </div>
                 </div>
 
                 <!-- Descrição -->
-                <div>
-                    <label class="block text-xs font-medium text-gray-400 uppercase tracking-wider mb-1">Descrição</label>
-                    <textarea id="prod-desc" rows="3" class="block w-full rounded-xl bg-dark-800 border-gray-700 text-white focus:border-blue-500 border p-3 outline-none" placeholder="Detalhes..."></textarea>
+                <div class="md:col-span-2">
+                    <label class="text-xs text-gray-500">Descrição Detalhada (Defeitos, acessórios inclusos)</label>
+                    <textarea id="prod-desc" rows="3" class="w-full bg-dark-900 border border-dark-600 rounded-lg p-3 text-white"></textarea>
                 </div>
 
-                <div class="pt-2">
-                    <button type="submit" class="w-full bg-blue-600 text-white py-3.5 rounded-xl hover:bg-blue-500 font-semibold shadow-lg shadow-blue-900/20 transition">Salvar Produto</button>
+                <div class="md:col-span-2 pt-4">
+                    <button type="submit" class="w-full bg-brand-600 text-white py-3 rounded-lg font-bold">Salvar Produto</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- Modal Configurações (NOVO) -->
-    <div id="settings-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/80 backdrop-blur-sm">
-        <div class="glass-card rounded-2xl shadow-2xl p-6 md:p-8 max-w-md w-full m-4 border border-white/10">
-            <div class="flex justify-between items-center mb-6">
-                <h3 class="text-2xl font-bold text-white">Configurações da Loja</h3>
-                <button onclick="app.closeModal('settings-modal')" class="text-gray-400 hover:text-white transition"><i class="fa-solid fa-times text-xl"></i></button>
-            </div>
+    <!-- Modal Configurações -->
+    <div id="settings-modal" class="fixed inset-0 z-[90] hidden flex items-center justify-center bg-black/90 backdrop-blur-sm">
+        <div class="bg-dark-800 rounded-2xl p-6 max-w-md w-full border border-white/10">
+            <h3 class="text-xl font-bold mb-4">Configurar Loja</h3>
             <form id="settings-form" class="space-y-4">
                 <div>
-                    <label class="block text-xs font-medium text-gray-400 uppercase tracking-wider mb-2">Número do WhatsApp (com DDD)</label>
-                    <input type="text" id="setting-phone" placeholder="Ex: 5511999999999" class="block w-full rounded-xl bg-dark-800 border-gray-700 text-white focus:border-blue-500 border p-3 outline-none" required>
-                    <p class="text-xs text-gray-600 mt-2">Este número receberá as mensagens dos clientes.</p>
+                    <label class="text-xs text-gray-500">WhatsApp da Loja</label>
+                    <input type="text" id="setting-phone" class="w-full bg-dark-900 border border-dark-600 rounded-lg p-3 text-white">
                 </div>
-                <div class="pt-2">
-                    <button type="submit" class="w-full bg-blue-600 text-white py-3.5 rounded-xl hover:bg-blue-500 font-semibold shadow-lg shadow-blue-900/20 transition">Salvar Configurações</button>
-                </div>
+                <button type="submit" class="w-full bg-brand-600 text-white py-3 rounded-lg font-bold">Salvar</button>
+                <button type="button" onclick="app.closeModal('settings-modal')" class="w-full text-gray-500 py-2">Cancelar</button>
             </form>
         </div>
     </div>
 
-    <!-- Botão Flutuante WhatsApp -->
-    <div onclick="app.contactWhatsApp()" class="fixed bottom-6 right-6 bg-[#25D366] hover:bg-[#20bd5a] cursor-pointer text-white p-4 rounded-full shadow-[0_0_20px_rgba(37,211,102,0.4)] transition transform hover:scale-110 z-40 flex items-center justify-center group">
-        <i class="fa-brands fa-whatsapp text-3xl group-hover:rotate-12 transition duration-300"></i>
+    <!-- Botão Flutuante -->
+    <div onclick="app.contactWhatsApp()" class="fixed bottom-6 right-6 bg-[#25D366] hover:bg-[#20bd5a] cursor-pointer text-white h-14 w-14 rounded-full shadow-lg shadow-green-900/50 flex items-center justify-center z-40 transition hover:scale-110">
+        <i class="fa-brands fa-whatsapp text-3xl"></i>
     </div>
 
-    <!-- Notification Toast -->
-    <div id="toast" class="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-white text-black px-6 py-3 rounded-xl shadow-2xl transition-all duration-300 opacity-0 pointer-events-none z-50 font-medium translate-y-4">
-        Mensagem aqui
+    <!-- Toast -->
+    <div id="toast" class="fixed top-20 right-4 bg-dark-800 border border-white/10 text-white px-6 py-4 rounded-xl shadow-2xl transition-all duration-300 translate-x-full z-[100] flex items-center gap-3">
+        <i class="fa-solid fa-circle-check text-green-500"></i>
+        <span id="toast-msg">Mensagem</span>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, collection, addDoc, setDoc, getDocs, doc, deleteDoc, updateDoc, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, setDoc, doc, deleteDoc, updateDoc, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
+        // CONFIGURAÇÃO FIREBASE
         const firebaseConfig = {
             apiKey: "AIzaSyC_eJTAlkSBY6BMabDhD7PttC_rSOQ8wDY",
             authDomain: "chcell-263ec.firebaseapp.com",
@@ -345,381 +505,439 @@
         const appCheck = initializeApp(firebaseConfig);
         const auth = getAuth(appCheck);
         const db = getFirestore(appCheck);
-        
-        // Coleções
         const productsCol = collection(db, "products");
-        const settingsDoc = doc(db, "settings", "config"); // Doc único para config global
+        const settingsDoc = doc(db, "settings", "config");
 
-        let currentUser = null;
-        let products = [];
-        let isEditing = false;
-        let currentImageBase64 = ''; 
-        let storePhone = "5511999999999"; // Valor padrão se não houver no banco
+        // ESTADO GLOBAL
+        let state = {
+            user: null,
+            products: [],
+            cart: [], // Array de produtos no carrinho
+            phone: "5511999999999",
+            editingId: null,
+            currentImage: ''
+        };
 
-        // --- Funções Auxiliares ---
-
-        const compressImage = (file) => {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.readAsDataURL(file);
-                reader.onload = (event) => {
-                    const img = new Image();
-                    img.src = event.target.result;
-                    img.onload = () => {
-                        const canvas = document.createElement('canvas');
-                        const MAX_WIDTH = 600;
-                        const scaleSize = MAX_WIDTH / img.width;
-                        canvas.width = MAX_WIDTH;
-                        canvas.height = img.height * scaleSize;
-                        const ctx = canvas.getContext('2d');
-                        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                        resolve(canvas.toDataURL('image/jpeg', 0.7));
-                    }
-                }
-                reader.onerror = (error) => reject(error);
-            });
+        // --- SISTEMA DE CARRINHO ---
+        
+        function addToCart(product) {
+            state.cart.push(product);
+            updateCartUI();
+            showToast(`${product.name} adicionado!`);
+            // Abre o carrinho automaticamente para feedback
+            document.getElementById('cart-drawer').classList.remove('drawer-closed');
+            document.getElementById('cart-drawer').classList.add('drawer-open');
+            document.getElementById('cart-overlay').classList.remove('hidden');
         }
 
+        function removeFromCart(index) {
+            state.cart.splice(index, 1);
+            updateCartUI();
+        }
+
+        function updateCartUI() {
+            // Contador
+            const countBadge = document.getElementById('cart-count');
+            countBadge.innerText = state.cart.length;
+            state.cart.length > 0 ? countBadge.classList.remove('hidden') : countBadge.classList.add('hidden');
+
+            // Lista
+            const list = document.getElementById('cart-items');
+            const totalEl = document.getElementById('cart-total');
+            
+            if (state.cart.length === 0) {
+                list.innerHTML = `
+                    <div class="text-center py-10 text-gray-500">
+                        <i class="fa-solid fa-cart-arrow-down text-4xl mb-3 opacity-30"></i>
+                        <p>Seu carrinho está vazio.</p>
+                    </div>`;
+                totalEl.innerText = "R$ 0,00";
+                return;
+            }
+
+            let total = 0;
+            list.innerHTML = state.cart.map((p, index) => {
+                total += p.price;
+                return `
+                    <div class="flex gap-3 bg-dark-700/50 p-3 rounded-lg border border-white/5">
+                        <img src="${p.image}" class="w-16 h-16 object-contain bg-black rounded-md">
+                        <div class="flex-1">
+                            <h4 class="font-bold text-sm text-white line-clamp-1">${p.name}</h4>
+                            <p class="text-xs text-gray-400">${p.condition} • ${p.storage || ''}</p>
+                            <p class="text-brand-400 font-bold text-sm mt-1">R$ ${p.price.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</p>
+                        </div>
+                        <button onclick="app.removeFromCart(${index})" class="text-red-400 hover:text-red-300 self-start"><i class="fa-solid fa-trash-can"></i></button>
+                    </div>
+                `;
+            }).join('');
+            
+            totalEl.innerText = `R$ ${total.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+            // Atualiza também o total do modal de checkout
+            document.getElementById('checkout-total').innerText = totalEl.innerText;
+        }
+
+        // --- RENDERIZAÇÃO DE PRODUTOS ---
+
+        function renderProducts(filter = 'all', searchTerm = '') {
+            const grid = document.getElementById('product-grid');
+            
+            let filtered = state.products;
+            
+            // Filtro Categoria
+            if (filter !== 'all') {
+                filtered = filtered.filter(p => p.category === filter);
+            }
+            
+            // Filtro Busca
+            if (searchTerm) {
+                const term = searchTerm.toLowerCase();
+                filtered = filtered.filter(p => p.name.toLowerCase().includes(term));
+            }
+
+            if (filtered.length === 0) {
+                grid.innerHTML = `<div class="col-span-full text-center py-20 text-gray-500">Nenhum produto encontrado.</div>`;
+                return;
+            }
+
+            grid.innerHTML = filtered.map(p => {
+                // Badge Logic
+                let badgeClass = 'badge-usado';
+                if(p.condition === 'Novo') badgeClass = 'badge-novo';
+                if(p.condition === 'Vitrine') badgeClass = 'badge-vitrine';
+
+                return `
+                <div class="card-glass rounded-2xl overflow-hidden flex flex-col group hover-lift relative h-full">
+                    <div class="absolute top-3 left-3 z-10 flex flex-col gap-1">
+                        <span class="${badgeClass} text-[10px] font-bold px-2 py-1 rounded-md uppercase tracking-wide shadow-sm">${p.condition}</span>
+                        ${p.battery ? `<span class="bg-black/70 text-white text-[10px] px-2 py-1 rounded-md border border-white/10"><i class="fa-solid fa-battery-half mr-1"></i>${p.battery}</span>` : ''}
+                    </div>
+                    
+                    <div class="h-64 p-6 bg-gradient-to-b from-dark-800 to-dark-900 flex items-center justify-center relative overflow-hidden">
+                        <img src="${p.image}" class="max-h-full max-w-full object-contain transition-transform duration-500 group-hover:scale-110 drop-shadow-xl z-0">
+                    </div>
+                    
+                    <div class="p-5 flex-1 flex flex-col border-t border-white/5 bg-dark-800">
+                        <div class="mb-2">
+                            <h3 class="text-lg font-bold text-white leading-tight mb-1">${p.name}</h3>
+                            <div class="text-xs text-gray-400 flex gap-2 items-center mb-3">
+                                <span><i class="fa-solid fa-memory mr-1"></i>${p.storage || 'N/A'}</span>
+                                ${p.color ? `<span><i class="fa-solid fa-palette mr-1"></i>${p.color}</span>` : ''}
+                            </div>
+                        </div>
+                        
+                        <div class="mt-auto pt-3 border-t border-white/5">
+                            <p class="text-[10px] text-gray-500 mb-0.5">À vista no Pix</p>
+                            <div class="flex items-center justify-between">
+                                <span class="text-xl font-bold text-brand-400">R$ ${p.price.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</span>
+                                <button onclick="app.addToCartById('${p.id}')" class="bg-white text-black hover:bg-brand-500 hover:text-white h-10 w-10 rounded-full flex items-center justify-center transition shadow-lg">
+                                    <i class="fa-solid fa-plus"></i>
+                                </button>
+                            </div>
+                            <p class="text-[10px] text-gray-500 mt-1">ou 12x de R$ ${(p.price * 1.15 / 12).toLocaleString('pt-BR', {maximumFractionDigits: 2})}</p>
+                        </div>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        // --- APP EXPORTS ---
         window.app = {
+            // Cart
+            toggleCart: () => {
+                const drawer = document.getElementById('cart-drawer');
+                const overlay = document.getElementById('cart-overlay');
+                if (drawer.classList.contains('drawer-closed')) {
+                    drawer.classList.remove('drawer-closed');
+                    drawer.classList.add('drawer-open');
+                    overlay.classList.remove('hidden');
+                } else {
+                    drawer.classList.add('drawer-closed');
+                    drawer.classList.remove('drawer-open');
+                    overlay.classList.add('hidden');
+                }
+            },
+            addToCartById: (id) => {
+                const prod = state.products.find(p => p.id === id);
+                if(prod) addToCart(prod);
+            },
+            removeFromCart,
+
+            // Navigation
+            showHome: () => {
+                document.getElementById('admin-panel').classList.add('hidden');
+                window.scrollTo(0,0);
+            },
+            
+            // Filtros
+            filterProducts: (cat) => renderProducts(cat, document.getElementById('search-input').value),
+            searchProducts: (val) => renderProducts('all', val),
+
+            // Checkout Logic
+            goToCheckout: () => {
+                if(state.cart.length === 0) return showToast("Carrinho vazio!", true);
+                app.toggleCart(); // fecha drawer
+                
+                // Popula resumo
+                const summaryEl = document.getElementById('checkout-summary');
+                summaryEl.innerHTML = state.cart.map(p => `• ${p.name} (${p.condition}) - R$ ${p.price}`).join('<br>');
+                
+                document.getElementById('checkout-modal').classList.remove('hidden');
+            },
+            
+            toggleAddress: (show) => {
+                const fields = document.getElementById('address-fields');
+                const inputs = fields.querySelectorAll('input');
+                if(show) {
+                    fields.classList.remove('hidden');
+                    inputs.forEach(i => i.required = true);
+                } else {
+                    fields.classList.add('hidden');
+                    inputs.forEach(i => i.required = false);
+                }
+            },
+
+            // Modals Generics
+            closeModal: (id) => document.getElementById(id).classList.add('hidden'),
             toggleAdminModal: () => {
-                if (currentUser) {
-                    toggleView('admin');
+                if (state.user) {
+                    document.getElementById('admin-panel').classList.remove('hidden');
+                    updateAdminStats();
                 } else {
                     document.getElementById('login-modal').classList.remove('hidden');
                 }
             },
-            closeModal: (id) => document.getElementById(id).classList.add('hidden'),
-            logout: () => {
-                signOut(auth).then(() => {
-                    showToast('Desconectado');
-                    toggleView('home');
-                });
-            },
-            showHome: () => toggleView('home'),
-            hideAdminPanel: () => toggleView('home'),
-            
-            showAddProductModal: () => {
-                isEditing = false;
-                currentImageBase64 = '';
-                document.getElementById('modal-title').innerText = "Adicionar Produto";
-                document.getElementById('product-form').reset();
-                document.getElementById('prod-id').value = '';
-                document.getElementById('image-preview').src = 'https://via.placeholder.com/100?text=Preview';
-                app.toggleImageInput('file');
-                document.getElementById('product-modal').classList.remove('hidden');
+            hideAdminPanel: () => document.getElementById('admin-panel').classList.add('hidden'),
+
+            // Contact
+            contactWhatsApp: (msg = "") => {
+                const text = msg || "Olá! Vim pelo site da CH Celulares.";
+                window.open(`https://wa.me/${state.phone}?text=${encodeURIComponent(text)}`, '_blank');
             },
 
+            // CRUD UI
+            showAddProductModal: () => {
+                state.editingId = null;
+                state.currentImage = '';
+                document.getElementById('modal-title').innerText = "Novo Produto";
+                document.getElementById('product-form').reset();
+                document.getElementById('image-preview').src = '';
+                document.getElementById('product-modal').classList.remove('hidden');
+            },
             showSettingsModal: () => {
-                document.getElementById('setting-phone').value = storePhone;
+                document.getElementById('setting-phone').value = state.phone;
                 document.getElementById('settings-modal').classList.remove('hidden');
             },
-
             editProduct: (id) => {
-                const prod = products.find(p => p.id === id);
+                const prod = state.products.find(p => p.id === id);
                 if (!prod) return;
+                state.editingId = id;
+                state.currentImage = prod.image;
                 
-                isEditing = true;
-                currentImageBase64 = prod.image || ''; 
-                
-                document.getElementById('modal-title').innerText = "Editar Produto";
-                document.getElementById('prod-id').value = prod.id;
+                // Fill fields
                 document.getElementById('prod-name').value = prod.name;
                 document.getElementById('prod-price').value = prod.price;
+                document.getElementById('prod-category').value = prod.category || 'iPhone';
+                document.getElementById('prod-condition').value = prod.condition || 'Usado';
+                document.getElementById('prod-storage').value = prod.storage || '';
+                document.getElementById('prod-battery').value = prod.battery || '';
+                document.getElementById('prod-color').value = prod.color || '';
                 document.getElementById('prod-desc').value = prod.description || '';
-                document.getElementById('prod-buy-link').value = prod.buyLink || ''; 
-                document.getElementById('image-preview').src = prod.image || 'https://via.placeholder.com/100?text=No+Img';
+                document.getElementById('prod-image-url').value = prod.image.startsWith('data') ? '' : prod.image;
+                document.getElementById('image-preview').src = prod.image;
                 
-                if(prod.image && prod.image.startsWith('http')) {
-                    document.getElementById('prod-image-url').value = prod.image;
-                    app.toggleImageInput('url');
-                } else {
-                    document.getElementById('prod-image-url').value = '';
-                    app.toggleImageInput('file');
-                }
+                document.getElementById('modal-title').innerText = "Editar Produto";
                 document.getElementById('product-modal').classList.remove('hidden');
             },
-
             deleteProduct: async (id) => {
-                if(confirm('Excluir este produto?')) {
-                    try {
-                        await deleteDoc(doc(db, "products", id));
-                        showToast("Excluído!");
-                    } catch (e) {
-                        console.error(e);
-                        showToast("Erro ao excluir.", true);
-                    }
-                }
+                if(confirm('Tem certeza?')) await deleteDoc(doc(db, "products", id));
             },
-            
-            buyItem: (productName, link) => {
-                if (link && link.trim() !== "") {
-                    window.open(link, '_blank');
-                } else {
-                    const text = `Olá! Tenho interesse no *${productName}*.`;
-                    const url = `https://wa.me/${storePhone}?text=${encodeURIComponent(text)}`;
-                    window.open(url, '_blank');
-                }
-            },
-
-            contactWhatsApp: () => {
-                const url = `https://wa.me/${storePhone}?text=${encodeURIComponent("Olá! Gostaria de saber mais sobre a loja.")}`;
-                window.open(url, '_blank');
-            },
-
-            toggleImageInput: (type) => {
-                const btnFile = document.getElementById('btn-file');
-                const btnUrl = document.getElementById('btn-url');
-                const boxFile = document.getElementById('input-file-container');
-                const boxUrl = document.getElementById('input-url-container');
-
-                if (type === 'file') {
-                    boxFile.classList.remove('hidden');
-                    boxUrl.classList.add('hidden');
-                    btnFile.className = "text-blue-400 font-bold border-b border-blue-400 pb-1";
-                    btnUrl.className = "text-gray-500 hover:text-white pb-1";
-                } else {
-                    boxFile.classList.add('hidden');
-                    boxUrl.classList.remove('hidden');
-                    btnUrl.className = "text-blue-400 font-bold border-b border-blue-400 pb-1";
-                    btnFile.className = "text-gray-500 hover:text-white pb-1";
-                }
-            }
+            logout: () => signOut(auth)
         };
 
-        // --- Event Listeners ---
+        // --- LOGIC: CHECKOUT WHATSAPP ---
+        document.getElementById('checkout-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const name = document.getElementById('cust-name').value;
+            const phone = document.getElementById('cust-phone').value;
+            const method = document.getElementById('cust-payment').value;
+            const deliveryType = document.querySelector('input[name="delivery"]:checked').value;
+            
+            let addressText = "Retirada na Loja";
+            if(deliveryType === 'entrega') {
+                addressText = `Entrega em: ${document.getElementById('cust-address').value}, ${document.getElementById('cust-city').value}`;
+            }
 
-        document.getElementById('prod-image-file').addEventListener('change', async function(e) {
-            if (this.files && this.files[0]) {
-                const file = this.files[0];
-                try {
-                    const base64 = await compressImage(file);
-                    currentImageBase64 = base64;
-                    document.getElementById('image-preview').src = base64;
-                } catch (err) {
-                    console.error("Erro na imagem", err);
-                    alert("Erro ao processar imagem.");
-                }
+            // Constroi Mensagem
+            let msg = `*NOVO PEDIDO - SITE CH CELULARES*\n`;
+            msg += `--------------------------------\n`;
+            msg += `👤 *Cliente:* ${name}\n`;
+            msg += `📞 *Contato:* ${phone}\n`;
+            msg += `📦 *Entrega:* ${addressText}\n`;
+            msg += `💳 *Pagamento:* ${method}\n`;
+            msg += `--------------------------------\n`;
+            msg += `*ITENS DO PEDIDO:*\n`;
+            
+            let total = 0;
+            state.cart.forEach(p => {
+                msg += `📱 1x ${p.name} (${p.condition}, ${p.storage || ''}) - R$ ${p.price}\n`;
+                total += p.price;
+            });
+            
+            msg += `--------------------------------\n`;
+            msg += `💰 *TOTAL A PAGAR:* R$ ${total.toLocaleString('pt-BR', {minimumFractionDigits: 2})}\n`;
+            msg += `\n_Aguardo confirmação para pagamento._`;
+
+            // Envia
+            const url = `https://wa.me/${state.phone}?text=${encodeURIComponent(msg)}`;
+            window.open(url, '_blank');
+            
+            // Limpa
+            state.cart = [];
+            updateCartUI();
+            app.closeModal('checkout-modal');
+        });
+
+        // --- AUTH & DATA LISTENERS ---
+        onAuthStateChanged(auth, (user) => {
+            state.user = user;
+            if(user) document.getElementById('adminBtn').classList.remove('hidden');
+        });
+
+        // Load Products
+        onSnapshot(query(productsCol, orderBy("name")), (snap) => {
+            state.products = snap.docs.map(d => ({id: d.id, ...d.data()}));
+            renderProducts();
+            document.getElementById('loading-spinner').classList.add('hidden');
+            if(!document.getElementById('admin-panel').classList.contains('hidden')) updateAdminTable();
+        });
+
+        // Load Settings
+        onSnapshot(settingsDoc, (snap) => {
+            if(snap.exists()) state.phone = snap.data().whatsapp || "5511999999999";
+        });
+
+        // --- ADMIN FORMS ---
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            try {
+                await signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('password').value);
+                document.getElementById('login-modal').classList.add('hidden');
+                app.toggleAdminModal();
+            } catch (err) {
+                document.getElementById('login-error').innerText = "Credenciais inválidas.";
+                document.getElementById('login-error').classList.remove('hidden');
             }
         });
 
-        document.getElementById('prod-image-url').addEventListener('input', function(e) {
+        // Image Handling
+        document.getElementById('prod-image-file').addEventListener('change', async function() {
+            if(this.files[0]) {
+                const reader = new FileReader();
+                reader.readAsDataURL(this.files[0]);
+                reader.onload = function(e) {
+                    // Resize Logic Basic
+                    const img = new Image();
+                    img.src = e.target.result;
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        const ctx = canvas.getContext('2d');
+                        const MAX_WIDTH = 500; 
+                        const scale = MAX_WIDTH / img.width;
+                        canvas.width = MAX_WIDTH;
+                        canvas.height = img.height * scale;
+                        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                        state.currentImage = canvas.toDataURL('image/jpeg', 0.7);
+                        document.getElementById('image-preview').src = state.currentImage;
+                    }
+                }
+            }
+        });
+        
+        document.getElementById('prod-image-url').addEventListener('input', function() {
             if(this.value) {
-                currentImageBase64 = this.value;
+                state.currentImage = this.value;
                 document.getElementById('image-preview').src = this.value;
             }
         });
 
-        const loginForm = document.getElementById('login-form');
-        loginForm.addEventListener('submit', async (e) => {
+        // Save Product
+        document.getElementById('product-form').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            const errorDiv = document.getElementById('login-error');
-            errorDiv.classList.add('hidden');
+            const btn = e.target.querySelector('button');
+            btn.innerText = "Salvando...";
             
-            try {
-                await signInWithEmailAndPassword(auth, email, password);
-                document.getElementById('login-modal').classList.add('hidden');
-                loginForm.reset();
-                showToast("Login realizado");
-                toggleView('admin');
-            } catch (error) {
-                errorDiv.innerText = "Dados incorretos ou erro no Firebase.";
-                errorDiv.classList.remove('hidden');
-            }
-        });
-
-        // Configurações Form
-        const settingsForm = document.getElementById('settings-form');
-        settingsForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const btn = settingsForm.querySelector('button');
-            btn.innerText = "Salvando...";
-            btn.disabled = true;
-
-            const newPhone = document.getElementById('setting-phone').value.replace(/\D/g, ''); // Remove não-números
-
-            try {
-                // Salva na coleção settings, documento config
-                await setDoc(settingsDoc, { whatsapp: newPhone }, { merge: true });
-                showToast("Configurações salvas!");
-                document.getElementById('settings-modal').classList.add('hidden');
-            } catch (error) {
-                console.error(error);
-                showToast("Erro: Verifique as regras do Firebase.", true);
-            } finally {
-                btn.innerText = "Salvar Configurações";
-                btn.disabled = false;
-            }
-        });
-
-        onAuthStateChanged(auth, (user) => {
-            currentUser = user;
-            const adminBtn = document.getElementById('adminBtn');
-            const logoutBtn = document.getElementById('logoutBtn');
-
-            if (user && user.email === 'crlosmodder@gmail.com') {
-                adminBtn.innerHTML = `<i class="fa-solid fa-user-shield text-blue-400"></i> Olá, Carlos`;
-                adminBtn.classList.remove('hidden');
-                logoutBtn.classList.remove('hidden');
-            } else if (user) {
-                adminBtn.classList.add('hidden');
-                logoutBtn.classList.remove('hidden');
-                if(!document.getElementById('admin-panel').classList.contains('hidden')) toggleView('home');
-            } else {
-                adminBtn.innerHTML = `<i class="fa-solid fa-lock text-xs"></i> Área Admin`;
-                adminBtn.classList.remove('hidden');
-                logoutBtn.classList.add('hidden');
-                if(!document.getElementById('admin-panel').classList.contains('hidden')) toggleView('home');
-            }
-        });
-
-        // Firestore Realtime - Produtos
-        const q = query(productsCol, orderBy("name"));
-        onSnapshot(collection(db, "products"), (snapshot) => {
-            products = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            renderProducts();
-            renderAdminTable();
-            document.getElementById('loading-spinner').classList.add('hidden');
-        }, (error) => {
-            console.error("Erro Produtos:", error);
-        });
-
-        // Firestore Realtime - Configurações
-        onSnapshot(settingsDoc, (docSnap) => {
-            if (docSnap.exists()) {
-                const data = docSnap.data();
-                if(data.whatsapp) {
-                    storePhone = data.whatsapp;
-                    // Atualiza botão flutuante
-                    // Não precisa atualizar nada visualmente além do botão flutuante se houver texto, mas aqui é só link
-                }
-            }
-        }, (error) => {
-            console.log("Aguardando configurações...");
-        });
-
-        const productForm = document.getElementById('product-form');
-        productForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const btn = productForm.querySelector('button[type="submit"]');
-            btn.innerText = "Salvando...";
-            btn.disabled = true;
-
-            const id = document.getElementById('prod-id').value;
-            let finalImage = currentImageBase64; 
-            if(!finalImage) finalImage = 'https://via.placeholder.com/300/121212/FFFFFF?text=CH+Cell';
-
             const data = {
                 name: document.getElementById('prod-name').value,
                 price: parseFloat(document.getElementById('prod-price').value),
-                image: finalImage,
+                category: document.getElementById('prod-category').value,
+                condition: document.getElementById('prod-condition').value,
+                storage: document.getElementById('prod-storage').value,
+                battery: document.getElementById('prod-battery').value,
+                color: document.getElementById('prod-color').value,
                 description: document.getElementById('prod-desc').value,
-                buyLink: document.getElementById('prod-buy-link').value || '',
+                image: state.currentImage || 'https://via.placeholder.com/300?text=No+Img',
                 updatedAt: new Date()
             };
 
             try {
-                if (isEditing && id) {
-                    await updateDoc(doc(db, "products", id), data);
-                    showToast("Atualizado!");
+                if(state.editingId) {
+                    await updateDoc(doc(db, "products", state.editingId), data);
+                    showToast("Produto atualizado!");
                 } else {
                     data.createdAt = new Date();
                     await addDoc(productsCol, data);
-                    showToast("Criado!");
+                    showToast("Produto criado!");
                 }
-                document.getElementById('product-modal').classList.add('hidden');
-            } catch (error) {
-                console.error("Erro ao salvar:", error);
-                showToast("Erro ao salvar. Verifique permissões.", true);
-            } finally {
-                btn.innerText = "Salvar Produto";
-                btn.disabled = false;
+                app.closeModal('product-modal');
+            } catch(err) {
+                console.error(err);
+                alert("Erro ao salvar. Verifique se você está logado.");
             }
+            btn.innerText = "Salvar Produto";
         });
 
-        function renderProducts() {
-            const grid = document.getElementById('product-grid');
-            if (products.length === 0) {
-                grid.innerHTML = `<div class="col-span-full text-center py-20 text-gray-500">Nenhum produto.</div>`;
-                return;
-            }
+        // Settings Save
+        document.getElementById('settings-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const phone = document.getElementById('setting-phone').value.replace(/\D/g,'');
+            await setDoc(settingsDoc, { whatsapp: phone }, { merge: true });
+            showToast("Configuração salva!");
+            app.closeModal('settings-modal');
+        });
 
-            grid.innerHTML = products.map(p => `
-                <div class="product-card glass-card rounded-2xl overflow-hidden flex flex-col h-full group relative">
-                    <div class="h-64 overflow-hidden relative p-4 flex items-center justify-center bg-gradient-to-b from-transparent to-black/20">
-                        <img src="${p.image}" alt="${p.name}" class="max-h-full max-w-full object-contain transition-transform duration-500 group-hover:scale-110 drop-shadow-2xl">
-                    </div>
-                    <div class="p-6 flex-1 flex flex-col border-t border-white/5 bg-gradient-to-b from-dark-800 to-dark-900">
-                        <div class="mb-4">
-                            <h3 class="text-lg font-bold text-white leading-tight mb-2 group-hover:text-blue-400 transition">${p.name}</h3>
-                            <p class="text-gray-500 text-sm line-clamp-2">${p.description || ''}</p>
-                        </div>
-                        <div class="mt-auto pt-4 border-t border-white/5 flex items-end justify-between">
-                            <div>
-                                <p class="text-xs text-gray-500 mb-1">Valor</p>
-                                <div class="text-2xl font-bold text-blue-400">
-                                    R$ ${p.price.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                                </div>
-                            </div>
-                            <button onclick="app.buyItem('${p.name}', '${p.buyLink || ''}')" class="bg-white text-black h-10 w-10 rounded-full flex items-center justify-center hover:bg-blue-500 hover:text-white transition shadow-lg transform active:scale-95">
-                                <i class="${(p.buyLink) ? 'fa-solid fa-cart-shopping' : 'fa-brands fa-whatsapp'}"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            `).join('');
+        // Helpers
+        function showToast(msg, isError = false) {
+            const t = document.getElementById('toast');
+            document.getElementById('toast-msg').innerText = msg;
+            t.classList.remove('translate-x-full');
+            setTimeout(() => t.classList.add('translate-x-full'), 3000);
         }
 
-        function renderAdminTable() {
+        function updateAdminStats() {
+            document.getElementById('admin-total-prods').innerText = state.products.length;
+            updateAdminTable();
+        }
+
+        function updateAdminTable() {
             const tbody = document.getElementById('admin-product-list');
-            tbody.innerHTML = products.map(p => `
-                <tr class="hover:bg-white/5 transition">
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <div class="flex items-center">
-                            <div class="flex-shrink-0 h-10 w-10 bg-white/10 rounded-lg flex items-center justify-center overflow-hidden">
-                                <img class="h-8 w-8 object-contain" src="${p.image}">
-                            </div>
-                            <div class="ml-4">
-                                <div class="text-sm font-medium text-white">${p.name}</div>
-                            </div>
+            tbody.innerHTML = state.products.map(p => `
+                <tr class="hover:bg-dark-700/50">
+                    <td class="p-4 flex items-center gap-3">
+                        <img src="${p.image}" class="w-10 h-10 rounded object-cover">
+                        <div>
+                            <div class="font-bold text-white">${p.name}</div>
+                            <div class="text-xs text-gray-500">${p.category} • ${p.condition}</div>
                         </div>
                     </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-gray-300">R$ ${p.price.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <button onclick="app.editProduct('${p.id}')" class="text-blue-400 hover:text-blue-300 mr-4"><i class="fa-solid fa-pen"></i></button>
-                        <button onclick="app.deleteProduct('${p.id}')" class="text-red-500 hover:text-red-400"><i class="fa-solid fa-trash"></i></button>
+                    <td class="p-4 text-gray-300">R$ ${p.price}</td>
+                    <td class="p-4"><span class="bg-green-500/10 text-green-500 px-2 py-1 rounded text-xs">Em Estoque</span></td>
+                    <td class="p-4 text-right space-x-2">
+                        <button onclick="app.editProduct('${p.id}')" class="text-blue-400 hover:text-white"><i class="fa-solid fa-pen"></i></button>
+                        <button onclick="app.deleteProduct('${p.id}')" class="text-red-400 hover:text-white"><i class="fa-solid fa-trash"></i></button>
                     </td>
                 </tr>
             `).join('');
-        }
-
-        function toggleView(view) {
-            const adminPanel = document.getElementById('admin-panel');
-            const appContainer = document.getElementById('app-container');
-            const nav = document.querySelector('nav');
-
-            if (view === 'admin') {
-                appContainer.classList.add('hidden');
-                adminPanel.classList.remove('hidden');
-                nav.classList.add('hidden');
-            } else {
-                appContainer.classList.remove('hidden');
-                adminPanel.classList.add('hidden');
-                nav.classList.remove('hidden');
-            }
-            window.scrollTo(0,0);
-        }
-
-        function showToast(message, isError = false) {
-            const toast = document.getElementById('toast');
-            toast.innerText = message;
-            toast.classList.remove('translate-y-4', 'opacity-0', 'text-red-600', 'text-black');
-            toast.classList.add(isError ? 'text-red-600' : 'text-black', 'translate-y-0', 'opacity-100');
-            setTimeout(() => {
-                toast.classList.remove('translate-y-0', 'opacity-100');
-                toast.classList.add('translate-y-4', 'opacity-0');
-            }, 3000);
         }
     </script>
 </body>
