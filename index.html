@@ -18,10 +18,6 @@
                             800: '#121212',
                             700: '#1e1e1e',
                             600: '#2d2d2d'
-                        },
-                        gold: {
-                            500: '#D4AF37',
-                            400: '#FFD700'
                         }
                     },
                     fontFamily: {
@@ -46,7 +42,7 @@
             background: rgba(18, 18, 18, 0.7);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
         }
         
         .glass-card {
@@ -55,17 +51,13 @@
             border: 1px solid rgba(255, 255, 255, 0.08);
         }
 
-        /* Hover Glow Effect */
-        .product-card {
-            transition: all 0.4s ease;
-        }
+        .product-card { transition: all 0.4s ease; }
         .product-card:hover {
             transform: translateY(-8px);
             border-color: rgba(59, 130, 246, 0.5);
             box-shadow: 0 0 20px rgba(59, 130, 246, 0.15);
         }
 
-        /* Custom Scrollbar */
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: #0a0a0a; }
         ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
@@ -73,13 +65,9 @@
 
         .loader {
             border-top-color: #3B82F6;
-            -webkit-animation: spinner 1.5s linear infinite;
             animation: spinner 1.5s linear infinite;
         }
-        @keyframes spinner {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
+        @keyframes spinner { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         
         .text-gradient {
             background: linear-gradient(to right, #60a5fa, #a78bfa);
@@ -91,7 +79,7 @@
 <body class="antialiased min-h-screen flex flex-col">
 
     <!-- Navegação -->
-    <nav class="glass fixed w-full top-0 z-50 border-b border-white/5">
+    <nav class="glass fixed w-full top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-20 items-center">
                 <div class="flex items-center cursor-pointer group" onclick="app.showHome()">
@@ -117,7 +105,6 @@
         
         <!-- Hero Section -->
         <div id="hero-section" class="relative overflow-hidden">
-            <!-- Background Elements -->
             <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[500px] bg-blue-600/20 rounded-full blur-[120px] -z-10 opacity-50"></div>
             
             <div class="max-w-7xl mx-auto px-4 py-24 sm:px-6 lg:px-8 relative z-10">
@@ -132,11 +119,11 @@
                         A melhor seleção de smartphones topo de linha. Garantia, procedência e a exclusividade que você merece.
                     </p>
                     <div class="flex justify-center gap-4">
-                        <a href="#produtos" class="bg-blue-600 text-white px-8 py-4 rounded-full font-semibold shadow-[0_0_20px_rgba(37,99,235,0.3)] hover:bg-blue-500 hover:shadow-[0_0_30px_rgba(37,99,235,0.5)] transition-all transform hover:-translate-y-1">
+                        <a href="#produtos" class="bg-blue-600 text-white px-8 py-4 rounded-full font-semibold shadow-[0_0_20px_rgba(37,99,235,0.3)] hover:bg-blue-500 transition-all transform hover:-translate-y-1">
                             Ver Coleção
                         </a>
                         <a href="https://wa.me/5511999999999" target="_blank" class="glass text-white px-8 py-4 rounded-full font-semibold hover:bg-white/10 transition-all border border-white/10 flex items-center gap-2">
-                            <i class="fa-brands fa-whatsapp"></i> Fale Conosco
+                            <i class="fa-brands fa-whatsapp"></i> WhatsApp
                         </a>
                     </div>
                 </div>
@@ -150,9 +137,6 @@
                     <h2 class="text-3xl font-bold text-white">Catálogo</h2>
                     <p class="mt-1 text-gray-500">Disponível para entrega imediata</p>
                 </div>
-                <div class="hidden md:block">
-                    <span class="text-xs font-mono text-gray-600">LIVE STOCK UPDATE</span>
-                </div>
             </div>
 
             <!-- Loader -->
@@ -163,14 +147,13 @@
 
             <!-- Grid -->
             <div id="product-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-                <!-- Produtos serão inseridos aqui via JS -->
+                <!-- Produtos via JS -->
             </div>
         </div>
         
-        <!-- Footer Simples -->
         <footer class="border-t border-white/5 py-12 mt-12 bg-black/40">
             <div class="max-w-7xl mx-auto px-4 text-center">
-                <p class="text-gray-600 text-sm">© 2024 CH Celulares. Todos os direitos reservados.</p>
+                <p class="text-gray-600 text-sm">© 2024 CH Celulares.</p>
             </div>
         </footer>
     </div>
@@ -178,11 +161,8 @@
     <!-- Admin: Modal de Login -->
     <div id="login-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/80 backdrop-blur-sm">
         <div class="glass-card rounded-2xl shadow-2xl p-8 max-w-md w-full m-4 border border-white/10 relative overflow-hidden">
-            <!-- Glow effect inside modal -->
-            <div class="absolute top-0 right-0 w-32 h-32 bg-blue-600/20 rounded-full blur-[50px] -z-10"></div>
-            
             <div class="flex justify-between items-center mb-8">
-                <h3 class="text-2xl font-bold text-white">Acesso Restrito</h3>
+                <h3 class="text-2xl font-bold text-white">Acesso Admin</h3>
                 <button onclick="app.closeModal('login-modal')" class="text-gray-400 hover:text-white transition"><i class="fa-solid fa-times text-xl"></i></button>
             </div>
             
@@ -196,20 +176,20 @@
                     <input type="password" id="password" class="block w-full rounded-xl bg-dark-800 border-gray-700 text-white shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:bg-dark-700 transition p-3 outline-none border" required>
                 </div>
                 <div id="login-error" class="text-red-400 text-sm hidden bg-red-900/20 p-3 rounded-lg border border-red-900/30"></div>
-                <button type="submit" class="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white py-3.5 px-4 rounded-xl hover:from-blue-500 hover:to-blue-600 font-semibold shadow-lg shadow-blue-900/30 transition transform hover:scale-[1.02]">
-                    Entrar no Sistema
+                <button type="submit" class="w-full bg-blue-600 text-white py-3.5 px-4 rounded-xl hover:bg-blue-500 font-semibold shadow-lg shadow-blue-900/30 transition transform hover:scale-[1.02]">
+                    Entrar
                 </button>
             </form>
         </div>
     </div>
 
-    <!-- Admin: Dashboard & Formulário de Produto -->
+    <!-- Admin: Dashboard -->
     <div id="admin-panel" class="hidden bg-dark-900 min-h-screen pt-24 pb-20">
         <div class="max-w-7xl mx-auto px-4">
             <div class="flex flex-col md:flex-row justify-between items-center mb-10 gap-4">
                 <div>
                     <h2 class="text-3xl font-bold text-white">Gerenciar Estoque</h2>
-                    <p class="text-gray-500 mt-1">Controle total dos seus produtos</p>
+                    <p class="text-gray-500 mt-1">Bem-vindo, Carlos</p>
                 </div>
                 <button onclick="app.showAddProductModal()" class="bg-green-600 text-white px-6 py-3 rounded-xl hover:bg-green-500 shadow-lg shadow-green-900/20 flex items-center transition border border-green-500/20">
                     <i class="fa-solid fa-plus mr-2"></i> Adicionar Produto
@@ -227,7 +207,7 @@
                             </tr>
                         </thead>
                         <tbody id="admin-product-list" class="divide-y divide-gray-800/50">
-                            <!-- Lista Admin renderizada via JS -->
+                            <!-- Lista Admin -->
                         </tbody>
                     </table>
                 </div>
@@ -241,32 +221,73 @@
 
     <!-- Modal Adicionar/Editar Produto -->
     <div id="product-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/80 backdrop-blur-sm">
-        <div class="glass-card rounded-2xl shadow-2xl p-8 max-w-lg w-full m-4 max-h-[90vh] overflow-y-auto border border-white/10">
+        <div class="glass-card rounded-2xl shadow-2xl p-6 md:p-8 max-w-lg w-full m-4 max-h-[90vh] overflow-y-auto border border-white/10">
             <div class="flex justify-between items-center mb-6">
                 <h3 class="text-2xl font-bold text-white" id="modal-title">Adicionar Produto</h3>
                 <button onclick="app.closeModal('product-modal')" class="text-gray-400 hover:text-white transition"><i class="fa-solid fa-times text-xl"></i></button>
             </div>
             <form id="product-form" class="space-y-4">
                 <input type="hidden" id="prod-id">
+                
+                <!-- Nome -->
                 <div>
-                    <label class="block text-xs font-medium text-gray-400 uppercase tracking-wider mb-1">Nome do Modelo</label>
-                    <input type="text" id="prod-name" placeholder="Ex: iPhone 15 Pro Max Titanium" class="block w-full rounded-xl bg-dark-800 border-gray-700 text-white focus:border-blue-500 focus:ring-blue-500 border p-3 outline-none transition" required>
+                    <label class="block text-xs font-medium text-gray-400 uppercase tracking-wider mb-1">Modelo</label>
+                    <input type="text" id="prod-name" placeholder="Ex: iPhone 15 Pro" class="block w-full rounded-xl bg-dark-800 border-gray-700 text-white focus:border-blue-500 border p-3 outline-none" required>
                 </div>
+                
+                <!-- Preço -->
                 <div>
                     <label class="block text-xs font-medium text-gray-400 uppercase tracking-wider mb-1">Preço (R$)</label>
-                    <input type="number" step="0.01" id="prod-price" placeholder="Ex: 8500.00" class="block w-full rounded-xl bg-dark-800 border-gray-700 text-white focus:border-blue-500 focus:ring-blue-500 border p-3 outline-none transition" required>
+                    <input type="number" step="0.01" id="prod-price" placeholder="Ex: 5000.00" class="block w-full rounded-xl bg-dark-800 border-gray-700 text-white focus:border-blue-500 border p-3 outline-none" required>
                 </div>
+
+                <!-- Link de Pagamento -->
                 <div>
-                    <label class="block text-xs font-medium text-gray-400 uppercase tracking-wider mb-1">URL da Imagem</label>
-                    <input type="url" id="prod-image" placeholder="https://..." class="block w-full rounded-xl bg-dark-800 border-gray-700 text-white focus:border-blue-500 focus:ring-blue-500 border p-3 outline-none transition">
-                    <p class="text-xs text-gray-600 mt-2">Recomendado: Imagens com fundo transparente ou preto.</p>
+                    <label class="block text-xs font-medium text-gray-400 uppercase tracking-wider mb-1">Link de Compra/Pagamento (Opcional)</label>
+                    <input type="url" id="prod-buy-link" placeholder="Ex: Link do MercadoPago, Shopee ou Site" class="block w-full rounded-xl bg-dark-800 border-gray-700 text-white focus:border-blue-500 border p-3 outline-none">
+                    <p class="text-xs text-gray-600 mt-1">Se vazio, o botão abrirá o WhatsApp.</p>
                 </div>
+
+                <!-- Imagem -->
+                <div>
+                    <label class="block text-xs font-medium text-gray-400 uppercase tracking-wider mb-1">Imagem do Produto</label>
+                    
+                    <!-- Abas para escolher tipo de upload -->
+                    <div class="flex gap-4 mb-2 text-sm">
+                        <button type="button" onclick="app.toggleImageInput('file')" id="btn-file" class="text-blue-400 font-bold border-b border-blue-400 pb-1">Enviar Arquivo</button>
+                        <button type="button" onclick="app.toggleImageInput('url')" id="btn-url" class="text-gray-500 hover:text-white pb-1">Usar Link</button>
+                    </div>
+
+                    <!-- Input Arquivo -->
+                    <div id="input-file-container">
+                        <input type="file" id="prod-image-file" accept="image/*" class="block w-full text-sm text-gray-400
+                            file:mr-4 file:py-2 file:px-4
+                            file:rounded-full file:border-0
+                            file:text-sm file:font-semibold
+                            file:bg-blue-600 file:text-white
+                            hover:file:bg-blue-700 mb-2">
+                        <p class="text-xs text-gray-600">A imagem será otimizada automaticamente.</p>
+                    </div>
+
+                    <!-- Input URL -->
+                    <div id="input-url-container" class="hidden">
+                        <input type="url" id="prod-image-url" placeholder="https://..." class="block w-full rounded-xl bg-dark-800 border-gray-700 text-white focus:border-blue-500 border p-3 outline-none">
+                    </div>
+
+                    <!-- Preview -->
+                    <div class="mt-2 h-24 w-24 rounded-lg border border-gray-700 overflow-hidden bg-black flex items-center justify-center">
+                        <img id="image-preview" src="https://via.placeholder.com/100?text=Preview" class="max-h-full max-w-full object-contain">
+                    </div>
+                </div>
+
+                <!-- Descrição -->
                 <div>
                     <label class="block text-xs font-medium text-gray-400 uppercase tracking-wider mb-1">Descrição</label>
-                    <textarea id="prod-desc" rows="3" class="block w-full rounded-xl bg-dark-800 border-gray-700 text-white focus:border-blue-500 focus:ring-blue-500 border p-3 outline-none transition" placeholder="Detalhes técnicos, estado, bateria..."></textarea>
+                    <textarea id="prod-desc" rows="3" class="block w-full rounded-xl bg-dark-800 border-gray-700 text-white focus:border-blue-500 border p-3 outline-none" placeholder="Detalhes..."></textarea>
                 </div>
-                <div class="pt-4">
-                    <button type="submit" class="w-full bg-blue-600 text-white py-3.5 rounded-xl hover:bg-blue-500 font-semibold shadow-lg shadow-blue-900/20 transition transform hover:scale-[1.01]">Salvar Produto</button>
+
+                <div class="pt-2">
+                    <button type="submit" class="w-full bg-blue-600 text-white py-3.5 rounded-xl hover:bg-blue-500 font-semibold shadow-lg shadow-blue-900/20 transition">Salvar Produto</button>
                 </div>
             </form>
         </div>
@@ -282,13 +303,11 @@
         Mensagem aqui
     </div>
 
-    <!-- Firebase SDKs & Logic (Mesma lógica, apenas ajustes de renderização) -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getFirestore, collection, addDoc, getDocs, doc, deleteDoc, updateDoc, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // MANTENDO SUAS CREDENCIAIS ORIGINAIS
         const firebaseConfig = {
             apiKey: "AIzaSyC_eJTAlkSBY6BMabDhD7PttC_rSOQ8wDY",
             authDomain: "chcell-263ec.firebaseapp.com",
@@ -306,6 +325,35 @@
         let currentUser = null;
         let products = [];
         let isEditing = false;
+        let currentImageBase64 = ''; // Guarda a imagem atual
+
+        // --- Funções Auxiliares ---
+
+        // Função para comprimir imagem e converter para Base64
+        const compressImage = (file) => {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = (event) => {
+                    const img = new Image();
+                    img.src = event.target.result;
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        // Redimensiona para no máximo 600px de largura para não estourar o banco
+                        const MAX_WIDTH = 600;
+                        const scaleSize = MAX_WIDTH / img.width;
+                        canvas.width = MAX_WIDTH;
+                        canvas.height = img.height * scaleSize;
+                        
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                        // Comprime para JPEG com qualidade 0.7
+                        resolve(canvas.toDataURL('image/jpeg', 0.7));
+                    }
+                }
+                reader.onerror = (error) => reject(error);
+            });
+        }
 
         window.app = {
             toggleAdminModal: () => {
@@ -318,50 +366,127 @@
             closeModal: (id) => document.getElementById(id).classList.add('hidden'),
             logout: () => {
                 signOut(auth).then(() => {
-                    showToast('Desconectado com sucesso');
+                    showToast('Desconectado');
                     toggleView('home');
                 });
             },
             showHome: () => toggleView('home'),
             hideAdminPanel: () => toggleView('home'),
+            
             showAddProductModal: () => {
                 isEditing = false;
+                currentImageBase64 = '';
                 document.getElementById('modal-title').innerText = "Adicionar Produto";
                 document.getElementById('product-form').reset();
                 document.getElementById('prod-id').value = '';
+                document.getElementById('image-preview').src = 'https://via.placeholder.com/100?text=Preview';
+                
+                // Reset visual inputs
+                app.toggleImageInput('file');
                 document.getElementById('product-modal').classList.remove('hidden');
             },
+
             editProduct: (id) => {
                 const prod = products.find(p => p.id === id);
                 if (!prod) return;
+                
                 isEditing = true;
+                currentImageBase64 = prod.image || ''; // Mantém a imagem atual
+                
                 document.getElementById('modal-title').innerText = "Editar Produto";
                 document.getElementById('prod-id').value = prod.id;
                 document.getElementById('prod-name').value = prod.name;
                 document.getElementById('prod-price').value = prod.price;
-                document.getElementById('prod-image').value = prod.image || '';
                 document.getElementById('prod-desc').value = prod.description || '';
+                document.getElementById('prod-buy-link').value = prod.buyLink || ''; // Carrega link se existir
+                
+                // Preview da imagem
+                document.getElementById('image-preview').src = prod.image || 'https://via.placeholder.com/100?text=No+Img';
+                
+                // Se for URL externa, mostra no campo URL, se for base64, limpa url
+                if(prod.image && prod.image.startsWith('http')) {
+                    document.getElementById('prod-image-url').value = prod.image;
+                    app.toggleImageInput('url');
+                } else {
+                    document.getElementById('prod-image-url').value = '';
+                    app.toggleImageInput('file');
+                }
+
                 document.getElementById('product-modal').classList.remove('hidden');
             },
+
             deleteProduct: async (id) => {
-                if(confirm('Tem certeza que deseja excluir este produto?')) {
+                if(confirm('Excluir este produto?')) {
                     try {
                         await deleteDoc(doc(db, "products", id));
-                        showToast("Produto excluído!");
+                        showToast("Excluído!");
                     } catch (e) {
                         console.error(e);
                         showToast("Erro ao excluir.", true);
                     }
                 }
             },
-            buyOnWhatsApp: (productName) => {
-                const phone = "5511999999999"; 
-                const text = `Olá! Tenho interesse no *${productName}* que vi na Loja Online. Poderia me enviar mais detalhes?`;
-                const url = `https://wa.me/${phone}?text=${encodeURIComponent(text)}`;
-                window.open(url, '_blank');
+            
+            buyItem: (productName, link) => {
+                if (link && link.trim() !== "") {
+                    // Se tiver link de pagamento, abre ele
+                    window.open(link, '_blank');
+                } else {
+                    // Se não, vai pro WhatsApp
+                    const phone = "5511999999999"; 
+                    const text = `Olá! Tenho interesse no *${productName}*.`;
+                    const url = `https://wa.me/${phone}?text=${encodeURIComponent(text)}`;
+                    window.open(url, '_blank');
+                }
+            },
+
+            toggleImageInput: (type) => {
+                const btnFile = document.getElementById('btn-file');
+                const btnUrl = document.getElementById('btn-url');
+                const boxFile = document.getElementById('input-file-container');
+                const boxUrl = document.getElementById('input-url-container');
+
+                if (type === 'file') {
+                    boxFile.classList.remove('hidden');
+                    boxUrl.classList.add('hidden');
+                    btnFile.className = "text-blue-400 font-bold border-b border-blue-400 pb-1";
+                    btnUrl.className = "text-gray-500 hover:text-white pb-1";
+                } else {
+                    boxFile.classList.add('hidden');
+                    boxUrl.classList.remove('hidden');
+                    btnUrl.className = "text-blue-400 font-bold border-b border-blue-400 pb-1";
+                    btnFile.className = "text-gray-500 hover:text-white pb-1";
+                }
             }
         };
 
+        // --- Event Listeners ---
+
+        // Preview da imagem ao selecionar arquivo
+        document.getElementById('prod-image-file').addEventListener('change', async function(e) {
+            if (this.files && this.files[0]) {
+                const file = this.files[0];
+                try {
+                    // Comprime e gera preview
+                    const base64 = await compressImage(file);
+                    currentImageBase64 = base64;
+                    document.getElementById('image-preview').src = base64;
+                } catch (err) {
+                    console.error("Erro na imagem", err);
+                    alert("Erro ao processar imagem.");
+                }
+            }
+        });
+
+        // Preview ao digitar URL
+        document.getElementById('prod-image-url').addEventListener('input', function(e) {
+            if(this.value) {
+                currentImageBase64 = this.value;
+                document.getElementById('image-preview').src = this.value;
+            }
+        });
+
+        // Auth
         const loginForm = document.getElementById('login-form');
         loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -374,11 +499,10 @@
                 await signInWithEmailAndPassword(auth, email, password);
                 document.getElementById('login-modal').classList.add('hidden');
                 loginForm.reset();
-                showToast("Bem-vindo de volta!");
+                showToast("Login realizado");
                 toggleView('admin');
             } catch (error) {
-                console.error("Erro login:", error);
-                errorDiv.innerText = "Acesso negado. Verifique suas credenciais.";
+                errorDiv.innerText = "Dados incorretos ou erro no Firebase.";
                 errorDiv.classList.remove('hidden');
             }
         });
@@ -388,18 +512,23 @@
             const adminBtn = document.getElementById('adminBtn');
             const logoutBtn = document.getElementById('logoutBtn');
 
-            if (user) {
-                adminBtn.innerHTML = `<i class="fa-solid fa-user-shield text-blue-400"></i> Painel`;
+            if (user && user.email === 'crlosmodder@gmail.com') {
+                adminBtn.innerHTML = `<i class="fa-solid fa-user-shield text-blue-400"></i> Olá, Carlos`;
+                adminBtn.classList.remove('hidden');
                 logoutBtn.classList.remove('hidden');
+            } else if (user) {
+                adminBtn.classList.add('hidden');
+                logoutBtn.classList.remove('hidden');
+                if(!document.getElementById('admin-panel').classList.contains('hidden')) toggleView('home');
             } else {
                 adminBtn.innerHTML = `<i class="fa-solid fa-lock text-xs"></i> Área Admin`;
+                adminBtn.classList.remove('hidden');
                 logoutBtn.classList.add('hidden');
-                if(!document.getElementById('admin-panel').classList.contains('hidden')) {
-                    toggleView('home');
-                }
+                if(!document.getElementById('admin-panel').classList.contains('hidden')) toggleView('home');
             }
         });
 
+        // Firestore Realtime
         const q = query(productsCol, orderBy("name"));
         onSnapshot(collection(db, "products"), (snapshot) => {
             products = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -407,41 +536,47 @@
             renderAdminTable();
             document.getElementById('loading-spinner').classList.add('hidden');
         }, (error) => {
-            console.error("Erro ao buscar produtos:", error);
+            console.error("Erro:", error);
         });
 
+        // Salvar Produto
         const productForm = document.getElementById('product-form');
         productForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = productForm.querySelector('button[type="submit"]');
-            const originalText = btn.innerText;
-            btn.innerText = "Processando...";
+            btn.innerText = "Salvando...";
             btn.disabled = true;
 
             const id = document.getElementById('prod-id').value;
+            
+            // Define imagem final (Base64 do arquivo OU URL digitada OU mantém a antiga)
+            let finalImage = currentImageBase64; 
+            if(!finalImage) finalImage = 'https://via.placeholder.com/300/121212/FFFFFF?text=CH+Cell';
+
             const data = {
                 name: document.getElementById('prod-name').value,
                 price: parseFloat(document.getElementById('prod-price').value),
-                image: document.getElementById('prod-image').value || 'https://via.placeholder.com/300/121212/FFFFFF?text=CH+Cell',
+                image: finalImage,
                 description: document.getElementById('prod-desc').value,
+                buyLink: document.getElementById('prod-buy-link').value || '', // Novo campo
                 updatedAt: new Date()
             };
 
             try {
                 if (isEditing && id) {
                     await updateDoc(doc(db, "products", id), data);
-                    showToast("Produto atualizado com sucesso");
+                    showToast("Atualizado!");
                 } else {
                     data.createdAt = new Date();
                     await addDoc(productsCol, data);
-                    showToast("Produto adicionado ao catálogo");
+                    showToast("Criado!");
                 }
                 document.getElementById('product-modal').classList.add('hidden');
             } catch (error) {
                 console.error("Erro ao salvar:", error);
-                showToast("Erro ao salvar.", true);
+                showToast("Erro ao salvar. Você é o admin?", true);
             } finally {
-                btn.innerText = originalText;
+                btn.innerText = "Salvar Produto";
                 btn.disabled = false;
             }
         });
@@ -449,35 +584,29 @@
         function renderProducts() {
             const grid = document.getElementById('product-grid');
             if (products.length === 0) {
-                grid.innerHTML = `
-                    <div class="col-span-full text-center py-20 rounded-2xl border border-white/5 bg-white/5">
-                        <i class="fa-solid fa-mobile-screen text-gray-700 text-6xl mb-4"></i>
-                        <p class="text-gray-400 text-lg">Catálogo vazio.</p>
-                        <p class="text-xs text-gray-600 mt-2">Adicione produtos no painel administrativo.</p>
-                    </div>
-                `;
+                grid.innerHTML = `<div class="col-span-full text-center py-20 text-gray-500">Nenhum produto.</div>`;
                 return;
             }
 
             grid.innerHTML = products.map(p => `
                 <div class="product-card glass-card rounded-2xl overflow-hidden flex flex-col h-full group relative">
                     <div class="h-64 overflow-hidden relative p-4 flex items-center justify-center bg-gradient-to-b from-transparent to-black/20">
-                        <img src="${p.image}" alt="${p.name}" class="max-h-full max-w-full object-contain transition-transform duration-500 group-hover:scale-110 drop-shadow-2xl" onerror="this.src='https://via.placeholder.com/400x300/1e1e1e/666666?text=No+Image'">
+                        <img src="${p.image}" alt="${p.name}" class="max-h-full max-w-full object-contain transition-transform duration-500 group-hover:scale-110 drop-shadow-2xl">
                     </div>
                     <div class="p-6 flex-1 flex flex-col border-t border-white/5 bg-gradient-to-b from-dark-800 to-dark-900">
                         <div class="mb-4">
                             <h3 class="text-lg font-bold text-white leading-tight mb-2 group-hover:text-blue-400 transition">${p.name}</h3>
-                            <p class="text-gray-500 text-sm line-clamp-2">${p.description || 'Especificações premium e garantia inclusa.'}</p>
+                            <p class="text-gray-500 text-sm line-clamp-2">${p.description || ''}</p>
                         </div>
                         <div class="mt-auto pt-4 border-t border-white/5 flex items-end justify-between">
                             <div>
-                                <p class="text-xs text-gray-500 mb-1">À vista</p>
+                                <p class="text-xs text-gray-500 mb-1">Valor</p>
                                 <div class="text-2xl font-bold text-blue-400">
                                     R$ ${p.price.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                                 </div>
                             </div>
-                            <button onclick="app.buyOnWhatsApp('${p.name}')" class="bg-white text-black h-10 w-10 rounded-full flex items-center justify-center hover:bg-blue-500 hover:text-white transition shadow-lg transform active:scale-95">
-                                <i class="fa-solid fa-arrow-right -rotate-45"></i>
+                            <button onclick="app.buyItem('${p.name}', '${p.buyLink || ''}')" class="bg-white text-black h-10 w-10 rounded-full flex items-center justify-center hover:bg-blue-500 hover:text-white transition shadow-lg transform active:scale-95">
+                                <i class="${(p.buyLink) ? 'fa-solid fa-cart-shopping' : 'fa-brands fa-whatsapp'}"></i>
                             </button>
                         </div>
                     </div>
@@ -492,19 +621,17 @@
                     <td class="px-6 py-4 whitespace-nowrap">
                         <div class="flex items-center">
                             <div class="flex-shrink-0 h-10 w-10 bg-white/10 rounded-lg flex items-center justify-center overflow-hidden">
-                                <img class="h-8 w-8 object-contain" src="${p.image}" onerror="this.src='https://via.placeholder.com/40'">
+                                <img class="h-8 w-8 object-contain" src="${p.image}">
                             </div>
                             <div class="ml-4">
                                 <div class="text-sm font-medium text-white">${p.name}</div>
                             </div>
                         </div>
                     </td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <div class="text-sm text-gray-300">R$ ${p.price.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
-                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-gray-300">R$ ${p.price.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <button onclick="app.editProduct('${p.id}')" class="text-blue-400 hover:text-blue-300 mr-4 transition"><i class="fa-solid fa-pen"></i></button>
-                        <button onclick="app.deleteProduct('${p.id}')" class="text-red-500 hover:text-red-400 transition"><i class="fa-solid fa-trash"></i></button>
+                        <button onclick="app.editProduct('${p.id}')" class="text-blue-400 hover:text-blue-300 mr-4"><i class="fa-solid fa-pen"></i></button>
+                        <button onclick="app.deleteProduct('${p.id}')" class="text-red-500 hover:text-red-400"><i class="fa-solid fa-trash"></i></button>
                     </td>
                 </tr>
             `).join('');
@@ -518,7 +645,7 @@
             if (view === 'admin') {
                 appContainer.classList.add('hidden');
                 adminPanel.classList.remove('hidden');
-                nav.classList.add('hidden'); // Ocultar nav no admin para foco total
+                nav.classList.add('hidden');
             } else {
                 appContainer.classList.remove('hidden');
                 adminPanel.classList.add('hidden');
@@ -531,13 +658,7 @@
             const toast = document.getElementById('toast');
             toast.innerText = message;
             toast.classList.remove('translate-y-4', 'opacity-0', 'text-red-600', 'text-black');
-            
-            if(isError) {
-                toast.classList.add('text-red-600', 'translate-y-0', 'opacity-100');
-            } else {
-                toast.classList.add('text-black', 'translate-y-0', 'opacity-100');
-            }
-            
+            toast.classList.add(isError ? 'text-red-600' : 'text-black', 'translate-y-0', 'opacity-100');
             setTimeout(() => {
                 toast.classList.remove('translate-y-0', 'opacity-100');
                 toast.classList.add('translate-y-4', 'opacity-0');
