@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-PT">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>RecargaFast - Recarga com Desconto</title>
+    <title>RecargaFast - App de Recargas</title>
     
     <!-- PWA Meta Tags -->
     <link rel="manifest" href="manifest.json">
@@ -21,243 +21,137 @@
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
-
-        body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        /* Animations */
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(1.5rem); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes zoomIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
-        
-        .animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
-        .animate-slide-up { animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-        .animate-zoom-in { animation: zoomIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-        
+        body { font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
+        .glass-card { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); }
         .hidden { display: none !important; }
-
-        .glass-card {
-            background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
+        
+        @keyframes slideInUp {
+            from { transform: translateY(100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
         }
-
-        .bg-blob {
-            position: fixed;
-            width: 600px;
-            height: 600px;
-            border-radius: 50%;
-            filter: blur(100px);
-            z-index: -1;
-            opacity: 0.12;
-            pointer-events: none;
-        }
-
-        .operator-card.active {
-            border-color: #4f46e5;
-            background-color: #f5f3ff;
-            transform: scale(1.05);
-        }
-
-        .amount-card.active {
-            border-color: #4f46e5;
-            background-color: #4f46e5;
-            color: white;
-        }
+        .animate-slide-in { animation: slideInUp 0.5s ease-out forwards; }
     </style>
 </head>
 <body class="min-h-screen bg-slate-50 text-slate-900 overflow-x-hidden">
 
-    <div class="bg-blob bg-indigo-500 -top-20 -left-20"></div>
-    <div class="bg-blob bg-violet-500 -bottom-20 -right-20"></div>
-
     <!-- Navbar -->
     <nav class="bg-white/80 backdrop-blur-lg border-b border-slate-200/50 sticky top-0 z-50">
         <div class="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
-            <div class="flex items-center gap-2 cursor-pointer transition-transform active:scale-95" id="logo-btn">
-                <div class="bg-gradient-to-br from-indigo-600 to-violet-600 p-2 rounded-xl shadow-lg">
+            <div class="flex items-center gap-2 cursor-pointer" id="logo-btn">
+                <div class="bg-indigo-600 p-2 rounded-xl shadow-lg">
                     <i data-lucide="zap" class="w-5 h-5 text-white fill-white"></i>
                 </div>
-                <span class="text-xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-violet-700">
-                    RecargaFast
-                </span>
+                <span class="text-xl font-extrabold tracking-tight text-indigo-600">RecargaFast</span>
             </div>
             
-            <div class="flex items-center gap-3">
-                <!-- BOTÃO DE INSTALAÇÃO (PWA) -->
-                <button id="pwa-install-btn" class="hidden items-center gap-2 bg-amber-500 text-white hover:bg-amber-600 py-2 px-4 rounded-xl transition-all shadow-md shadow-amber-200 font-bold text-sm active:scale-95">
+            <div class="flex items-center gap-2">
+                <!-- Botão de Instalação Dinâmico -->
+                <button id="pwa-install-btn" class="hidden items-center gap-2 bg-amber-500 text-white hover:bg-amber-600 py-2 px-4 rounded-xl transition-all font-bold text-sm shadow-md">
                     <i data-lucide="download-cloud" class="w-4 h-4"></i>
-                    <span class="hidden sm:inline">Baixar App</span>
+                    <span class="hidden sm:inline">Instalar App</span>
                 </button>
 
-                <div id="user-logged-in" class="hidden flex items-center gap-2">
-                    <button id="btn-history" class="hidden md:flex items-center gap-2 text-slate-600 hover:bg-slate-100 py-2 px-4 rounded-xl transition-all text-sm font-semibold">
-                        <i data-lucide="history" class="w-4 h-4"></i>
-                        Histórico
-                    </button>
-                    <div class="flex items-center gap-2 bg-indigo-50 py-1.5 px-3 rounded-full border border-indigo-100">
-                        <span id="user-name-display" class="text-indigo-700 font-bold text-sm truncate max-w-[80px]"></span>
-                        <button id="btn-logout" class="text-indigo-400 hover:text-red-500 transition-colors">
-                            <i data-lucide="log-out" class="w-4 h-4"></i>
-                        </button>
-                    </div>
-                </div>
-
-                <button id="btn-open-login" class="flex items-center gap-2 bg-indigo-600 text-white hover:bg-indigo-700 py-2 px-5 rounded-xl transition-all shadow-md shadow-indigo-200 font-bold text-sm active:scale-95">
-                    <i data-lucide="user" class="w-4 h-4"></i>
-                    Entrar
+                <!-- Botão Ajuda (Para quando o download automático falha) -->
+                <button id="btn-help-install" class="flex items-center gap-2 bg-slate-100 text-slate-600 hover:bg-slate-200 py-2 px-3 rounded-xl transition-all font-bold text-sm">
+                    <i data-lucide="help-circle" class="w-4 h-4"></i>
                 </button>
+
+                <button id="btn-open-login" class="bg-indigo-600 text-white py-2 px-5 rounded-xl font-bold text-sm">Entrar</button>
             </div>
         </div>
     </nav>
 
-    <!-- Main Content -->
-    <main class="max-w-5xl mx-auto px-4 py-8 md:py-16 flex flex-col lg:flex-row gap-12 lg:items-center">
-        <!-- Marketing -->
-        <div class="w-full lg:w-1/2 flex flex-col space-y-8 animate-slide-up">
-            <div class="space-y-4">
-                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-100 text-indigo-700 w-fit text-xs font-bold uppercase tracking-wide">
-                    <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
-                    Oferta Exclusiva PIX
-                </div>
-                <h1 class="text-4xl md:text-6xl font-extrabold leading-[1.1] text-slate-900 tracking-tight">
-                    Recarga rápida com <br>
-                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-violet-500">desconto real.</span>
-                </h1>
-                <p class="text-lg md:text-xl text-slate-500 max-w-lg leading-relaxed font-medium">
-                    Economize até 33% em cada recarga. Saldo liberado na hora diretamente no seu celular.
-                </p>
-            </div>
+    <!-- Main Hero -->
+    <main class="max-w-5xl mx-auto px-4 py-12 flex flex-col lg:flex-row gap-12 items-center">
+        <div class="w-full lg:w-1/2 space-y-6">
+            <h1 class="text-5xl font-extrabold text-slate-900 leading-tight">
+                Baixe o nosso app e <span class="text-indigo-600">poupe tempo.</span>
+            </h1>
+            <p class="text-lg text-slate-500 font-medium">Instale agora na sua tela inicial para fazer recargas em menos de 10 segundos.</p>
         </div>
 
-        <!-- App Widget -->
-        <div class="w-full lg:w-1/2 max-w-xl mx-auto">
-            <div class="glass-card rounded-[32px] shadow-2xl border border-white overflow-hidden relative min-h-[550px] flex flex-col animate-zoom-in">
-                <div id="loading-overlay" class="hidden absolute inset-0 bg-white/60 backdrop-blur-md z-20 flex items-center justify-center">
-                    <div class="w-14 h-14 border-4 border-indigo-100 border-t-indigo-600 rounded-full animate-spin"></div>
+        <!-- App Placeholder -->
+        <div class="w-full lg:w-1/2 max-w-md">
+            <div class="glass-card rounded-[32px] shadow-2xl border border-white p-8 min-h-[400px] flex flex-col justify-center items-center text-center space-y-6">
+                <div class="w-20 h-20 bg-indigo-100 rounded-3xl flex items-center justify-center">
+                    <i data-lucide="smartphone" class="w-10 h-10 text-indigo-600"></i>
                 </div>
-
-                <!-- Step 1: Input -->
-                <div id="step-input" class="p-8 md:p-10 flex flex-col h-full">
-                    <div class="flex items-center justify-between mb-8">
-                        <h2 class="text-2xl font-extrabold text-slate-800">Nova Recarga</h2>
-                        <i data-lucide="smartphone" class="w-6 h-6 text-slate-400"></i>
-                    </div>
-
-                    <div class="space-y-6 flex-1">
-                        <div class="space-y-2">
-                            <label class="text-sm font-bold text-slate-500 ml-1">Número do Celular</label>
-                            <input type="tel" id="phone-input" placeholder="(00) 00000-0000" class="w-full px-5 py-4 bg-white border-2 border-slate-100 rounded-2xl text-xl focus:outline-none focus:border-indigo-500 transition-all font-bold" />
-                        </div>
-                        <div class="space-y-3">
-                            <label class="text-sm font-bold text-slate-500 ml-1">Operadora</label>
-                            <div id="operators-grid" class="grid grid-cols-4 gap-3"></div>
-                        </div>
-                        <div class="space-y-3">
-                            <label class="text-sm font-bold text-slate-500 ml-1">Valor</label>
-                            <div id="amounts-grid" class="grid grid-cols-2 gap-4"></div>
-                        </div>
-                    </div>
-
-                    <button id="btn-continue" disabled class="w-full py-5 rounded-2xl font-extrabold text-lg flex items-center justify-center gap-3 transition-all mt-8 bg-slate-100 text-slate-400 cursor-not-allowed">
-                        Continuar
-                        <i data-lucide="chevron-right" class="w-5 h-5"></i>
-                    </button>
-                </div>
-
-                <!-- Checkout & Success (Omitidos para brevidade, mas devem ser mantidos do código original) -->
-                <div id="step-checkout" class="hidden p-8">...</div>
-                <div id="step-success" class="hidden p-8">...</div>
+                <h2 class="text-2xl font-black text-slate-800">Recarga na Palma da Mão</h2>
+                <p class="text-slate-400">Clique no botão de instalação acima ou use o menu do navegador para "Adicionar ao Ecrã Principal".</p>
             </div>
         </div>
     </main>
 
-    <!-- Firebase e Lógica -->
+    <!-- Modal de Ajuda de Instalação (Manual) -->
+    <div id="modal-help" class="hidden fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-4">
+        <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" id="close-help-overlay"></div>
+        <div class="bg-white rounded-t-[32px] sm:rounded-[32px] w-full max-w-md relative z-10 overflow-hidden shadow-2xl animate-slide-in">
+            <div class="p-8 space-y-6">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-2xl font-black text-slate-800">Como Instalar?</h3>
+                    <button id="close-help-btn" class="text-slate-400"><i data-lucide="x" class="w-6 h-6"></i></button>
+                </div>
+                
+                <div class="space-y-4">
+                    <div class="flex gap-4 items-start">
+                        <div class="bg-indigo-50 p-3 rounded-xl text-indigo-600 font-bold">1</div>
+                        <div>
+                            <p class="font-bold text-slate-700">No Android (Chrome)</p>
+                            <p class="text-sm text-slate-500">Clique nos <span class="font-bold">três pontinhos</span> no canto superior e selecione <span class="font-bold">"Instalar Aplicativo"</span>.</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-4 items-start">
+                        <div class="bg-indigo-50 p-3 rounded-xl text-indigo-600 font-bold">2</div>
+                        <div>
+                            <p class="font-bold text-slate-700">No iPhone (Safari)</p>
+                            <p class="text-sm text-slate-500">Clique no botão de <span class="font-bold">Partilhar</span> (quadrado com seta) e escolha <span class="font-bold">"Adicionar ao Ecrã Principal"</span>.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <button id="close-help-confirm" class="w-full py-4 bg-indigo-600 text-white rounded-2xl font-bold">Entendido!</button>
+            </div>
+        </div>
+    </div>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+        // ... (resto do seu firebase config aqui)
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyBA_qqcT9NC9wCMFDPR34WMt6NYIMGB35w",
-            authDomain: "recarga-eff36.firebaseapp.com",
-            projectId: "recarga-eff36",
-            storageBucket: "recarga-eff36.firebasestorage.app",
-            messagingSenderId: "209300037391",
-            appId: "1:209300037391:web:8420372be4d3ba6e28687a"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-
-        // Inicializar ícones
         lucide.createIcons();
 
-        // Lógica de PWA e Botão de Download
+        // LOGICA PWA
         let deferredPrompt;
         const installBtn = document.getElementById('pwa-install-btn');
+        const modalHelp = document.getElementById('modal-help');
 
+        // Escuta o evento de instalação do navegador
         window.addEventListener('beforeinstallprompt', (e) => {
-            // Previne que o Chrome mostre o prompt automático muito cedo
             e.preventDefault();
-            // Guarda o evento para ser disparado quando o usuário clicar no botão
             deferredPrompt = e;
-            // Mostra o botão de instalação na interface
+            // Só mostra o botão se o navegador confirmar que pode instalar
             installBtn.classList.remove('hidden');
             installBtn.classList.add('flex');
         });
 
         installBtn.addEventListener('click', async () => {
             if (!deferredPrompt) return;
-            // Mostra o prompt de instalação do navegador
             deferredPrompt.prompt();
-            // Espera pela resposta do usuário
             const { outcome } = await deferredPrompt.userChoice;
-            if (outcome === 'accepted') {
-                console.log('Usuário aceitou a instalação');
-            }
+            if (outcome === 'accepted') installBtn.classList.add('hidden');
             deferredPrompt = null;
-            installBtn.classList.add('hidden');
         });
 
-        window.addEventListener('appinstalled', () => {
-            console.log('PWA instalado com sucesso');
-            installBtn.classList.add('hidden');
-        });
+        // Lógica dos Modais de Ajuda
+        document.getElementById('btn-help-install').onclick = () => modalHelp.classList.remove('hidden');
+        document.getElementById('close-help-btn').onclick = () => modalHelp.classList.add('hidden');
+        document.getElementById('close-help-overlay').onclick = () => modalHelp.classList.add('hidden');
+        document.getElementById('close-help-confirm').onclick = () => modalHelp.classList.add('hidden');
 
-        // Simulação básica da UI (Para que os preços apareçam)
-        async function loadData() {
-            const snap = await getDoc(doc(db, 'config', 'prices'));
-            if (snap.exists()) {
-                const config = snap.data();
-                const grid = document.getElementById('amounts-grid');
-                grid.innerHTML = config.prices.map(p => `
-                    <button class="amount-card p-4 rounded-2xl border-2 border-slate-100 bg-white transition-all">
-                        <span class="text-lg font-black">R$ ${p.value}</span>
-                    </button>
-                `).join('');
-            }
-        }
-        loadData();
-
-        // Auth Listener
-        onAuthStateChanged(auth, u => {
-            if (u) {
-                document.getElementById('user-logged-in').classList.remove('hidden');
-                document.getElementById('btn-open-login').classList.add('hidden');
-                document.getElementById('user-name-display').textContent = u.email.split('@')[0];
-            }
-        });
-    </script>
-
-    <!-- Registro do Service Worker -->
-    <script>
+        // Registro do Service Worker
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js');
+                navigator.serviceWorker.register('sw.js').catch(err => console.log("Erro SW:", err));
             });
         }
     </script>
