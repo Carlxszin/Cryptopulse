@@ -5,7 +5,401 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>RecargaFast - Recarga com Desconto</title>
     
+    <!-- Configurações PWA<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>RecargaFast - Recarga com Desconto</title>
+    
     <!-- Configurações PWA -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#4f46e5">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="RecargaFast">
+    <link rel="apple-touch-icon" href="icon-192.png">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* Animações */
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(1.5rem); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideRight { from { opacity: 0; transform: translateX(2rem); } to { opacity: 1; transform: translateX(0); } }
+        @keyframes zoomIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+        
+        .animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
+        .animate-slide-up { animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        .animate-slide-right { animation: slideRight 0.4s ease-out forwards; }
+        .animate-zoom-in { animation: zoomIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        
+        .hidden { display: none !important; }
+
+        /* Scrollbar customizada */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+
+        .bg-blob {
+            position: fixed;
+            width: 500px;
+            height: 500px;
+            border-radius: 50%;
+            filter: blur(80px);
+            z-index: -1;
+            opacity: 0.15;
+            pointer-events: none;
+        }
+
+        .btn-glow {
+            box-shadow: 0 0 15px rgba(245, 158, 11, 0.3);
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-slate-50 text-slate-900 selection:bg-indigo-100 overflow-x-hidden">
+
+    <div class="bg-blob bg-indigo-400 -top-20 -left-20"></div>
+    <div class="bg-blob bg-violet-400 -bottom-20 -right-20"></div>
+
+    <!-- Navbar -->
+    <nav class="bg-white/70 backdrop-blur-md border-b border-slate-200/50 sticky top-0 z-50">
+        <div class="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-2 cursor-pointer transition-transform hover:scale-105 active:scale-95" id="logo-btn">
+                <div class="bg-gradient-to-br from-indigo-600 to-violet-600 p-2 rounded-xl shadow-lg shadow-indigo-200">
+                    <i data-lucide="zap" class="w-5 h-5 text-white fill-white"></i>
+                </div>
+                <span class="text-xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-violet-700">
+                    RecargaFast
+                </span>
+            </div>
+            
+            <div class="flex items-center gap-2">
+                <!-- PWA INSTALL BUTTONS -->
+                <button id="pwa-install-auto" class="hidden items-center gap-2 bg-amber-500 text-white hover:bg-amber-600 py-2 px-4 rounded-xl transition-all font-bold text-sm shadow-md btn-glow animate-pulse active:scale-95">
+                    <i data-lucide="download-cloud" class="w-4 h-4"></i>
+                    <span class="hidden sm:inline">Baixar App</span>
+                </button>
+
+                <button id="pwa-install-manual" class="flex items-center gap-2 bg-slate-100 text-slate-600 hover:bg-slate-200 py-2 px-4 rounded-xl transition-all font-bold text-sm border border-slate-200 active:scale-95">
+                    <i data-lucide="help-circle" class="w-4 h-4"></i>
+                    <span class="hidden sm:inline">Como Instalar?</span>
+                </button>
+
+                <div id="user-logged-in" class="hidden flex items-center gap-2">
+                    <button id="btn-history" class="hidden md:flex items-center gap-2 text-slate-600 hover:bg-slate-100 py-2 px-4 rounded-xl transition-all text-sm font-semibold">
+                        <i data-lucide="history" class="w-4 h-4"></i> Histórico
+                    </button>
+                    <div class="flex items-center gap-2 bg-indigo-50/50 py-1.5 px-3 rounded-full border border-indigo-100">
+                        <span id="user-name-display" class="text-indigo-700 font-bold text-sm truncate max-w-[80px]"></span>
+                        <button id="btn-logout" class="text-indigo-400 hover:text-red-500 transition-colors">
+                            <i data-lucide="log-out" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <a href="admin.html" id="btn-admin-panel" class="hidden flex items-center gap-2 bg-slate-900 text-white py-2 px-4 rounded-xl transition-all text-xs font-bold uppercase tracking-wider">
+                    <i data-lucide="settings" class="w-3.5 h-3.5"></i> <span class="hidden sm:inline">Painel Admin</span>
+                </a>
+                
+                <button id="btn-open-login" class="flex items-center gap-2 bg-indigo-600 text-white hover:bg-indigo-700 py-2 px-5 rounded-xl transition-all shadow-md shadow-indigo-200 font-bold text-sm active:scale-95">
+                    <i data-lucide="user" class="w-4 h-4"></i> Entrar
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- App View -->
+    <div id="view-app" class="animate-fade-in">
+        <main class="max-w-5xl mx-auto px-4 py-8 md:py-16 flex flex-col lg:flex-row gap-12 lg:items-center">
+            
+            <div class="w-full lg:w-1/2 flex flex-col space-y-8 animate-slide-up">
+                <div class="space-y-4">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-100 text-indigo-700 w-fit text-xs font-bold uppercase tracking-wide">
+                        <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> Oferta Exclusiva PIX
+                    </div>
+                    <h1 class="text-4xl md:text-6xl font-extrabold leading-[1.1] text-slate-900 tracking-tight">
+                        Recarga rápida com <br>
+                        <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-violet-500">desconto real.</span>
+                    </h1>
+                    <p class="text-lg md:text-xl text-slate-500 max-w-lg leading-relaxed font-medium">
+                        Economize até 33% em cada recarga. Saldo liberado na hora diretamente no seu celular.
+                    </p>
+                </div>
+            </div>
+
+            <div class="w-full lg:w-1/2 max-w-xl mx-auto">
+                <div class="glass-card rounded-[32px] shadow-2xl shadow-indigo-200/40 border border-white overflow-hidden relative min-h-[580px] flex flex-col animate-zoom-in">
+                    
+                    <div id="loading-overlay" class="hidden absolute inset-0 bg-white/60 backdrop-blur-md z-20 flex items-center justify-center">
+                        <div class="w-14 h-14 border-4 border-indigo-100 border-t-indigo-600 rounded-full animate-spin"></div>
+                    </div>
+
+                    <!-- STEP 1 -->
+                    <div id="step-input" class="p-8 md:p-10 flex flex-col h-full animate-slide-up">
+                        <div class="flex items-center justify-between mb-8">
+                            <h2 class="text-2xl font-extrabold text-slate-800 tracking-tight">Nova Recarga</h2>
+                            <i data-lucide="smartphone" class="w-6 h-6 text-slate-400"></i>
+                        </div>
+
+                        <div class="space-y-6 flex-1">
+                            <div class="space-y-2">
+                                <label class="text-sm font-bold text-slate-500 ml-1">Número do Celular</label>
+                                <input type="tel" id="phone-input" placeholder="(00) 00000-0000" class="w-full px-5 py-4 bg-white border-2 border-slate-100 rounded-2xl text-xl focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-bold" />
+                            </div>
+                            <div class="space-y-3">
+                                <label class="text-sm font-bold text-slate-500 ml-1">Operadora</label>
+                                <div id="operators-grid" class="grid grid-cols-4 gap-3"></div>
+                            </div>
+                            <div class="space-y-3">
+                                <label class="text-sm font-bold text-slate-500 ml-1">Valor</label>
+                                <div id="amounts-grid" class="grid grid-cols-2 gap-4"></div>
+                            </div>
+                        </div>
+
+                        <button id="btn-continue" disabled class="w-full py-5 rounded-2xl font-extrabold text-lg flex items-center justify-center gap-3 transition-all mt-8 bg-slate-100 text-slate-400 cursor-not-allowed">
+                            Continuar
+                            <i data-lucide="chevron-right" class="w-5 h-5"></i>
+                        </button>
+                    </div>
+
+                    <!-- STEP 2: CHECKOUT -->
+                    <div id="step-checkout" class="hidden p-8 md:p-10 flex flex-col h-full animate-slide-right">
+                        <button id="btn-back" class="w-fit p-2 -ml-2 mb-6 text-slate-400 hover:text-slate-900 rounded-xl">
+                            <i data-lucide="arrow-left" class="w-5 h-5"></i>
+                        </button>
+                        <h2 class="text-2xl font-extrabold mb-8 text-slate-800">Confirmar Pedido</h2>
+                        <div class="bg-white/50 border border-slate-100 rounded-3xl p-6 space-y-5 mb-8 text-sm">
+                            <div class="flex justify-between items-center"><span class="text-slate-400 font-bold">Número</span><span id="checkout-phone" class="font-extrabold text-slate-800"></span></div>
+                            <div class="flex justify-between items-center"><span class="text-slate-400 font-bold">Operadora</span><span id="checkout-operator" class="font-bold px-3 py-1 rounded-lg text-white"></span></div>
+                            <div class="h-px w-full bg-slate-100"></div>
+                            <div class="flex justify-between items-end"><span class="text-slate-800 font-bold">Total</span><span id="checkout-total" class="text-4xl font-black text-indigo-600 tracking-tighter"></span></div>
+                        </div>
+                        <button id="btn-pay" class="w-full py-5 rounded-2xl font-extrabold text-lg bg-indigo-600 text-white hover:bg-indigo-700 shadow-xl shadow-indigo-100">Gerar QR Code PIX</button>
+                    </div>
+
+                    <!-- STEP 3: SUCCESS -->
+                    <div id="step-success" class="hidden p-8 md:p-10 flex flex-col items-center h-full text-center animate-zoom-in">
+                        <div id="status-icon-container" class="w-20 h-20 bg-amber-100 rounded-3xl flex items-center justify-center mb-6">
+                            <i data-lucide="loader-2" class="w-10 h-10 text-amber-500 animate-spin"></i>
+                        </div>
+                        <h2 id="status-title" class="text-2xl font-black mb-2 text-slate-800">Aguardando...</h2>
+                        <div id="pix-container" class="w-full bg-white border border-slate-100 p-6 rounded-[24px] shadow-inner mb-6 space-y-4">
+                            <img id="pix-qr-code" src="" class="w-40 h-40 mx-auto rounded-lg hidden" />
+                            <div id="pix-code-text" class="bg-slate-50 p-3 rounded-xl text-xs font-mono truncate">Aguardando...</div>
+                            <button id="btn-copy-pix" class="w-full py-3 text-sm font-bold text-indigo-600 bg-indigo-50 rounded-xl">Copiar PIX</button>
+                        </div>
+                        <button id="btn-new" class="w-full py-4 text-slate-400 font-bold">Cancelar</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- PWA MANUAL INSTALL MODAL -->
+    <div id="modal-pwa-install" class="hidden fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-4">
+        <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" id="pwa-overlay"></div>
+        <div class="bg-white rounded-t-[32px] sm:rounded-[32px] w-full max-w-lg relative z-10 overflow-hidden shadow-2xl animate-slide-up">
+            <div class="p-8">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-2xl font-black text-slate-800">Instalar RecargaFast</h3>
+                    <button id="close-pwa-modal" class="text-slate-400"><i data-lucide="x" class="w-6 h-6"></i></button>
+                </div>
+                <div class="space-y-4">
+                    <div class="flex items-center gap-4 p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                        <div class="bg-red-100 p-3 rounded-xl"><i data-lucide="compass" class="w-6 h-6 text-red-600"></i></div>
+                        <div class="text-xs">
+                            <p class="font-bold text-slate-800">Opera GX / Desktop</p>
+                            <p class="text-slate-500">Menu → Apps → Instalar este site.</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-4 p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                        <div class="bg-blue-100 p-3 rounded-xl"><i data-lucide="share" class="w-6 h-6 text-blue-600"></i></div>
+                        <div class="text-xs">
+                            <p class="font-bold text-slate-800">iPhone / Safari</p>
+                            <p class="text-slate-500">Partilhar → Adicionar ao Ecrã Principal.</p>
+                        </div>
+                    </div>
+                </div>
+                <button class="w-full mt-8 py-4 bg-indigo-600 text-white rounded-2xl font-black" onclick="document.getElementById('modal-pwa-install').classList.add('hidden')">Entendido</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+        import { getFirestore, doc, onSnapshot, getDoc, setDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBA_qqcT9NC9wCMFDPR34WMt6NYIMGB35w",
+            authDomain: "recarga-eff36.firebaseapp.com",
+            projectId: "recarga-eff36",
+            storageBucket: "recarga-eff36.firebasestorage.app",
+            messagingSenderId: "209300037391",
+            appId: "1:209300037391:web:8420372be4d3ba6e28687a"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let OPERATORS = [];
+        let AMOUNTS = [];
+        let state = { phone: '', operator: null, amount: null };
+
+        lucide.createIcons();
+
+        // PWA Logic com suporte a atualizações
+        let deferredPrompt = null;
+        const pwaBtnAuto = document.getElementById('pwa-install-auto');
+        const pwaBtnManual = document.getElementById('pwa-install-manual');
+        const pwaModal = document.getElementById('modal-pwa-install');
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            pwaBtnAuto.classList.remove('hidden');
+            pwaBtnAuto.classList.add('flex');
+            pwaBtnManual.classList.add('hidden');
+        });
+
+        pwaBtnAuto.onclick = async () => {
+            if (!deferredPrompt) return;
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            if (outcome === 'accepted') pwaBtnAuto.classList.add('hidden');
+            deferredPrompt = null;
+        };
+
+        pwaBtnManual.onclick = () => pwaModal.classList.remove('hidden');
+        document.getElementById('close-pwa-modal').onclick = () => pwaModal.classList.add('hidden');
+        document.getElementById('pwa-overlay').onclick = () => pwaModal.classList.add('hidden');
+
+        // Registro do SW com detecção de versão nova
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js').then(reg => {
+                    reg.onupdatefound = () => {
+                        const installingWorker = reg.installing;
+                        installingWorker.onstatechange = () => {
+                            if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                // Versão nova detectada! Poderia mostrar um aviso aqui.
+                                console.log('Nova versão disponível. Por favor, reinicie o app.');
+                            }
+                        };
+                    };
+                });
+            });
+        }
+
+        // Lógica da App Original
+        async function loadConfig() {
+            const opsSnap = await getDocs(collection(db, 'operators'));
+            OPERATORS = opsSnap.docs.map(d => ({id: d.id, ...d.data()}));
+            const pkgsSnap = await getDocs(collection(db, 'packages'));
+            AMOUNTS = pkgsSnap.docs.map(d => ({id: d.id, ...d.data()})).sort((a,b) => Number(a.value) - Number(b.value));
+            renderOperators(); renderAmounts();
+        }
+
+        function renderOperators() {
+            document.getElementById('operators-grid').innerHTML = OPERATORS.map(op => `
+                <button data-id="${op.id}" class="op-btn py-3 rounded-xl font-bold text-xs border ${state.operator?.id === op.id ? op.color + ' text-white' : 'bg-white text-slate-400 border-slate-100'}">${op.name}</button>
+            `).join('');
+            document.querySelectorAll('.op-btn').forEach(btn => btn.onclick = (e) => {
+                state.operator = OPERATORS.find(o => o.id === e.target.dataset.id);
+                renderOperators(); validate();
+            });
+        }
+
+        function renderAmounts() {
+            document.getElementById('amounts-grid').innerHTML = AMOUNTS.map(amt => `
+                <button data-id="${amt.id}" class="amt-btn p-4 rounded-xl border-2 text-left ${state.amount?.id === amt.id ? 'border-indigo-600 bg-indigo-50' : 'border-slate-100 bg-white'}">
+                    <div class="text-[10px] text-slate-400 line-through font-bold">R$ ${Number(amt.value).toFixed(2)}</div>
+                    <div class="font-black text-lg text-slate-800">R$ ${Number(amt.pay).toFixed(2)}</div>
+                </button>
+            `).join('');
+            document.querySelectorAll('.amt-btn').forEach(btn => btn.onclick = (e) => {
+                state.amount = AMOUNTS.find(a => a.id === e.currentTarget.dataset.id);
+                renderAmounts(); validate();
+            });
+        }
+
+        document.getElementById('phone-input').oninput = (e) => {
+            let v = e.target.value.replace(/\D/g, '');
+            if (v.length > 11) v = v.slice(0, 11);
+            if (v.length > 2) v = `(${v.slice(0, 2)}) ${v.slice(2)}`;
+            if (v.length > 10) v = `${v.slice(0, 10)}-${v.slice(10)}`;
+            e.target.value = v; state.phone = v; validate();
+        };
+
+        function validate() {
+            const ok = state.phone.length >= 14 && state.operator && state.amount;
+            const btn = document.getElementById('btn-continue');
+            btn.disabled = !ok;
+            btn.className = ok ? "w-full py-5 rounded-2xl font-black bg-indigo-600 text-white mt-8" : "w-full py-5 rounded-2xl font-bold bg-slate-100 text-slate-400 mt-8";
+        }
+
+        document.getElementById('btn-continue').onclick = () => {
+            document.getElementById('step-input').classList.add('hidden');
+            document.getElementById('step-checkout').classList.remove('hidden');
+            document.getElementById('checkout-phone').textContent = state.phone;
+            document.getElementById('checkout-total').textContent = `R$ ${Number(state.amount.pay).toFixed(2)}`;
+            const opTag = document.getElementById('checkout-operator');
+            opTag.textContent = state.operator.name;
+            opTag.className = `font-bold px-3 py-1 rounded-lg text-white ${state.operator.color}`;
+        };
+
+        document.getElementById('btn-back').onclick = () => {
+            document.getElementById('step-checkout').classList.add('hidden');
+            document.getElementById('step-input').classList.remove('hidden');
+        };
+
+        document.getElementById('btn-pay').onclick = async () => {
+            document.getElementById('loading-overlay').classList.remove('hidden');
+            try {
+                // Mock do pagamento para o exemplo
+                const orderId = "ORD-" + Date.now();
+                await setDoc(doc(db, 'orders', orderId), { phone: state.phone, price: state.amount.pay, status: 'pending', userId: auth.currentUser?.uid || 'anon' });
+                
+                document.getElementById('step-checkout').classList.add('hidden');
+                document.getElementById('step-success').classList.remove('hidden');
+                document.getElementById('pix-code-text').textContent = "000201010212268...RECARGAFAST";
+                document.getElementById('pix-qr-code').src = "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=RECARGAFAST";
+                document.getElementById('pix-qr-code').classList.remove('hidden');
+            } finally { document.getElementById('loading-overlay').classList.add('hidden'); }
+        };
+
+        document.getElementById('btn-new').onclick = () => location.reload();
+        onAuthStateChanged(auth, u => {
+            if (u) {
+                document.getElementById('user-logged-in').classList.remove('hidden');
+                document.getElementById('btn-open-login').classList.add('hidden');
+                document.getElementById('user-name-display').textContent = u.displayName || u.email.split('@')[0];
+            }
+        });
+
+        loadConfig();
+    </script>
+</body>
+</html> -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#4f46e5">
     <meta name="apple-mobile-web-app-capable" content="yes">
