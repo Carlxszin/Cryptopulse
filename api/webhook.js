@@ -21,40 +21,43 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method === 'GET') return res.status(200).send('Webhook Online');
   
-  // Se não for POST (nem OPTIONS/GET), então recusa.
   if (req.method !== 'POST') return res.status(405).send('Method Not Allowed');
 
   try {
-    console.log("🔔 Webhook Acionado! Método:", req.method, "Query:", req.query);
+    // 2. Força a leitura do Body, mesmo que a Vercel receba como texto
+    let body = req.body;
+    if (typeof body === 'string') {
+      try { body = JSON.parse(body); } catch(e) { console.log('Body não é JSON'); }
+    }
+
+    console.log("🔔 Webhook Recebido! Body:", JSON.stringify(body));
+    console.log("🔔 Webhook Recebido! Query:", JSON.stringify(req.query));
 
     let dataId = null;
 
-    // 2. Extração à prova de falhas: procura o ID do pagamento em todos os locais possíveis
-    if (req.body && req.body.data && req.body.data.id) {
-      dataId = req.body.data.id;
-    } else if (req.query && req.query['data.id']) {
-      dataId = req.query['data.id'];
-    } else if (req.query && req.query.id) {
-      dataId = req.query.id;
-    } else if (req.body && req.body.id) {
-      dataId = req.body.id;
-    }
+    // 3. Procura o ID em todas as estruturas possíveis que o MP usa (IPN ou Webhook)
+    if (body?.data?.id) dataId = body.data.id;
+    else if (req.query?.['data.id']) dataId = req.query['data.id'];
+    else if (req.query?.id) dataId = req.query.id;
+    else if (body?.id) dataId = body.id;
 
     if (!dataId) {
-      console.log("⚠️ ID não encontrado no payload. Ignorando a notificação.");
+      console.log("⚠️ ID não encontrado. Ignorando a notificação.");
       return res.status(200).send('OK - Sem ID');
     }
 
-    // 3. Configurar Mercado Pago
+    // 4. Configurar Mercado Pago
     const MP_ACCESS_TOKEN = process.env.MP_ACCESS_TOKEN || 'APP_USR-5026206862993903-010320-ffe5ffb1e7ac9902baee0d45126bfa08-2485490772';
     const client = new MercadoPagoConfig({ accessToken: MP_ACCESS_TOKEN });
     const payment = new Payment(client);
     
-    // 4. Procurar o estado oficial na API
+    // 5. Procurar o estado oficial na API
+    console.log(`🔎 Buscando detalhes do pagamento ID: ${dataId}...`);
     const paymentInfo = await payment.get({ id: dataId });
-    console.log(`📊 Status real do pagamento ${dataId}: ${paymentInfo.status}`);
     
-    // 5. Se estiver aprovado, atualiza a base de dados em tempo real
+    console.log(`📊 Status real do pagamento ${dataId}: ${paymentInfo.status} | Ref: ${paymentInfo.external_reference}`);
+    
+    // 6. Atualizar Firebase se estiver pago
     if (paymentInfo.status === 'approved') {
       const externalRef = paymentInfo.external_reference; 
       
@@ -69,12 +72,11 @@ export default async function handler(req, res) {
       }
     }
 
-    // Retorna SEMPRE 200 para fechar a chamada com sucesso
+    // Retorna SEMPRE 200
     res.status(200).send('OK');
 
   } catch (error) {
-    console.error('❌ Erro no processamento do webhook:', error);
-    // Mesmo com erro interno, dizemos ao MP que recebemos para ele não travar
+    console.error('❌ Erro no processamento do webhook:', error.message || error);
     res.status(200).send('Erro interno processado.');
   }
 }
