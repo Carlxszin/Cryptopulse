@@ -30,7 +30,7 @@ export default async function handler(req, res) {
     const selectedPackage = packageDoc.data();
 
     // 2. Configurar Mercado Pago
-    const MP_ACCESS_TOKEN = process.env.MP_ACCESS_TOKEN || 'APP_USR-5026206862993903-010320-ffe5ffb1e7ac9902baee0d45126bfa08-2485490772';
+    const MP_ACCESS_TOKEN = process.env.MP_ACCESS_TOKEN || 'APP_USR-3c3a509b-b074-4620-960b-a5270b5a14ac';
     const client = new MercadoPagoConfig({ accessToken: MP_ACCESS_TOKEN });
     const payment = new Payment(client);
     
