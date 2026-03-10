@@ -19,28 +19,24 @@ export default async function handler(req, res) {
   try {
     const { packageId, phone, operator, userId } = req.body;
     
-    // 1. Vai buscar o preço do pacote diretamente ao Firebase
     const packageDoc = await db.collection('packages').doc(String(packageId)).get();
     
     if (!packageDoc.exists) {
-        // Se o pacote não existir na base de dados, bloqueia o pagamento
         return res.status(400).json({ error: 'Pacote inválido ou excluído do sistema.' });
     }
     
     const selectedPackage = packageDoc.data();
 
-    // 2. Configurar Mercado Pago
-    const MP_ACCESS_TOKEN = process.env.MP_ACCESS_TOKEN || 'APP_USR-2500067834250187-010423-aafec158951970e814b7db68138a86a9-2485490772';
+    // Pega o token seguro das variáveis da Vercel
+    const MP_ACCESS_TOKEN = process.env.MP_ACCESS_TOKEN;
     const client = new MercadoPagoConfig({ accessToken: MP_ACCESS_TOKEN });
     const payment = new Payment(client);
     
     const paymentIdStr = `recarga_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
 
-    const webhookUrl = process.env.VERCEL_URL 
-      ? `https://${process.env.VERCEL_URL}/api/webhook` 
-      : 'https://cryptopulse-kappa.vercel.app/api/webhook';
+    // 🔥 CORREÇÃO AQUI: URL estrita de produção. Nunca será bloqueada com erro 401.
+    const webhookUrl = 'https://cryptopulse-kappa.vercel.app/api/webhook';
 
-    // 3. Criar o PIX usando o preço oficial que veio da base de dados (selectedPackage.pay)
     const paymentResponse = await payment.create({
       body: {
         transaction_amount: Number(selectedPackage.pay),
@@ -52,7 +48,6 @@ export default async function handler(req, res) {
       }
     });
 
-    // 4. Salvar encomenda no Firestore
     await db.collection('orders').doc(paymentIdStr).set({
       packageId, phone, operator,
       pricePaid: Number(selectedPackage.pay),
