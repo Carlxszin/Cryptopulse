@@ -53,6 +53,12 @@
                     </button>
                 </div>
                 
+                <!-- Admin Button -->
+                <button id="btn-admin-panel" class="hidden flex items-center gap-2 bg-slate-800 text-white hover:bg-slate-700 py-1.5 px-4 rounded-full transition-colors text-xs font-bold uppercase tracking-wider mr-2">
+                    <i data-lucide="settings" class="w-4 h-4"></i>
+                    Admin
+                </button>
+
                 <button id="btn-open-login" class="flex items-center gap-2 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 py-1.5 px-4 rounded-full transition-colors">
                     <i data-lucide="user" class="w-4 h-4"></i>
                     Entrar
@@ -61,11 +67,11 @@
         </div>
     </nav>
 
-    <main class="max-w-4xl mx-auto px-4 py-8 md:py-12 flex flex-col md:flex-row gap-8">
-        
-        <!-- Left Column - Marketing -->
-        <div class="w-full md:w-1/2 flex flex-col justify-center space-y-6">
-            <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-indigo-100 text-indigo-700 w-fit text-sm font-semibold">
+    <!-- App View Wrapper -->
+    <div id="view-app">
+        <main class="max-w-4xl mx-auto px-4 py-8 md:py-12 flex flex-col md:flex-row gap-8">
+            
+            <!-- Left Column - Marketing -->
                 <i data-lucide="tag" class="w-4 h-4"></i>
                 Oferta por tempo limitado
             </div>
@@ -162,70 +168,70 @@
                         </div>
                         <div class="flex justify-between items-center">
                             <span class="text-emerald-600 font-medium text-sm">Desconto aplicado</span>
-                            <span id="checkout-discount" class="text-emerald-600 font-medium"></span>
-                        </div>
-                        <div class="h-px w-full bg-slate-200 my-2"></div>
-                        <div class="flex justify-between items-end">
-                            <span class="text-slate-800 font-semibold">Total a pagar</span>
-                            <span id="checkout-total" class="text-3xl font-black text-indigo-600"></span>
-                        </div>
+        </main>
+
+        <footer class="max-w-4xl mx-auto px-4 py-8 text-center text-slate-400 text-sm">
+            <p>© 2026 RecargaFast. Este é um ambiente simulado.</p>
+        </footer>
+    </div>
+
+    <!-- Admin View Wrapper -->
+    <div id="view-admin" class="hidden max-w-4xl mx-auto px-4 py-8 animate-fade-in">
+        <div class="flex items-center justify-between mb-8">
+            <h2 class="text-3xl font-bold text-slate-800 flex items-center gap-3">
+                <i data-lucide="settings" class="w-8 h-8 text-indigo-600"></i>
+                Painel Administrativo
+            </h2>
+            <button id="btn-back-home" class="flex items-center gap-2 text-indigo-600 font-semibold hover:bg-indigo-50 px-4 py-2 rounded-lg transition-colors">
+                <i data-lucide="arrow-left" class="w-5 h-5"></i> Voltar ao site
+            </button>
+        </div>
+
+        <div class="grid md:grid-cols-2 gap-8">
+            <!-- Operadoras -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                <h3 class="text-xl font-bold mb-4 text-slate-800">Operadoras</h3>
+                <div id="admin-operators-list" class="space-y-3 mb-6 max-h-64 overflow-y-auto pr-2"></div>
+                <hr class="my-4 border-slate-100">
+                <h4 class="font-semibold text-sm text-slate-600 mb-3">Adicionar Nova</h4>
+                <form id="form-add-operator" class="space-y-3">
+                    <input type="text" id="op-name" placeholder="Nome (ex: Correios)" class="w-full px-4 py-3 border border-slate-200 bg-slate-50 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+                    <select id="op-color" class="w-full px-4 py-3 border border-slate-200 bg-slate-50 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+                        <option value="bg-purple-600">Roxo</option>
+                        <option value="bg-red-600">Vermelho</option>
+                        <option value="bg-blue-600">Azul</option>
+                        <option value="bg-yellow-500">Amarelo</option>
+                        <option value="bg-emerald-500">Verde</option>
+                        <option value="bg-slate-800">Preto</option>
+                        <option value="bg-pink-500">Rosa</option>
+                    </select>
+                    <button type="submit" class="w-full bg-slate-800 text-white py-3 rounded-xl text-sm font-bold hover:bg-slate-900 transition-colors">Adicionar Operadora</button>
+                </form>
+            </div>
+
+            <!-- Pacotes -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                <h3 class="text-xl font-bold mb-4 text-slate-800">Pacotes de Recarga</h3>
+                <div id="admin-packages-list" class="space-y-3 mb-6 max-h-64 overflow-y-auto pr-2"></div>
+                <hr class="my-4 border-slate-100">
+                <h4 class="font-semibold text-sm text-slate-600 mb-3">Adicionar Novo</h4>
+                <form id="form-add-package" class="space-y-3">
+                    <div class="grid grid-cols-2 gap-3">
+                        <input type="number" id="pkg-value" placeholder="Valor (R$)" step="0.01" class="w-full px-4 py-3 border border-slate-200 bg-slate-50 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+                        <input type="number" id="pkg-pay" placeholder="A Pagar (R$)" step="0.01" class="w-full px-4 py-3 border border-slate-200 bg-slate-50 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
                     </div>
-
-                    <div class="flex-1">
-                        <div class="bg-emerald-50 border border-emerald-100 p-4 rounded-xl flex items-start gap-3 mb-6">
-                            <i data-lucide="qr-code" class="w-6 h-6 text-emerald-600 flex-shrink-0 mt-0.5"></i>
-                            <div>
-                                <h4 class="font-semibold text-emerald-800">Pague com PIX</h4>
-                                <p class="text-xs text-emerald-600 mt-1">Aprovação imediata. O saldo cai na hora no seu celular.</p>
-                            </div>
-                        </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <input type="text" id="pkg-discount" placeholder="Tag (ex: 20% OFF)" class="w-full px-4 py-3 border border-slate-200 bg-slate-50 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+                        <label class="flex items-center justify-center gap-2 text-sm font-medium text-slate-600 border border-slate-200 bg-slate-50 px-3 py-3 rounded-xl cursor-pointer hover:bg-slate-100 transition-colors">
+                            <input type="checkbox" id="pkg-popular" class="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500">
+                            Mais Escolhido
+                        </label>
                     </div>
-
-                    <button
-                        id="btn-pay"
-                        class="w-full py-4 rounded-xl font-bold text-lg flex items-center justify-center gap-2 bg-emerald-500 text-white hover:bg-emerald-600 shadow-lg shadow-emerald-200 transition-all hover:-translate-y-0.5 mt-auto"
-                    >
-                        <i data-lucide="qr-code" class="w-5 h-5"></i>
-                        Gerar PIX Copia e Cola
-                    </button>
-                </div>
-
-                <!-- STEP 3: SUCCESS -->
-                <div id="step-success" class="hidden p-6 md:p-8 flex flex-col items-center justify-center h-full text-center animate-zoom-in flex-1">
-                    <div id="status-icon-container" class="w-20 h-20 bg-amber-100 rounded-full flex items-center justify-center mb-6">
-                        <i data-lucide="loader-2" class="w-10 h-10 text-amber-500 animate-spin" id="status-icon"></i>
-                    </div>
-                    <h2 id="status-title" class="text-3xl font-bold mb-2 text-slate-800">Aguardando Pagamento</h2>
-                    <p id="status-desc" class="text-slate-500 mb-8 max-w-xs">
-                        Escaneie o QR Code ou copie o código PIX abaixo. O valor de <strong id="success-amount" class="text-slate-700"></strong> será creditado no número <strong id="success-phone" class="text-slate-700"></strong>.
-                    </p>
-
-                    <div id="pix-container" class="w-full bg-slate-50 p-4 rounded-xl border border-slate-200 mb-8">
-                        <div class="flex justify-center mb-4">
-                            <img id="pix-qr-code" src="" alt="QR Code PIX" class="w-48 h-48 rounded-lg shadow-sm border border-slate-200 hidden" />
-                        </div>
-                        <p class="text-xs text-slate-500 mb-2 uppercase font-bold tracking-wider">Código PIX (Copia e Cola)</p>
-                        <div id="pix-code-text" class="bg-white border border-slate-200 p-3 rounded-lg text-left text-xs text-slate-600 font-mono truncate select-all cursor-pointer">
-                            Aguarde...
-                        </div>
-                        <button id="btn-copy-pix" class="mt-3 text-sm font-semibold text-indigo-600 hover:text-indigo-700">Copiar Código</button>
-                    </div>
-
-                    <button
-                        id="btn-new"
-                        class="w-full py-3.5 rounded-xl font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all mt-auto"
-                    >
-                        Fazer nova recarga
-                    </button>
-                </div>
-
+                    <button type="submit" class="w-full bg-slate-800 text-white py-3 rounded-xl text-sm font-bold hover:bg-slate-900 transition-colors">Adicionar Pacote</button>
+                </form>
             </div>
         </div>
-    </main>
-
-    <footer class="max-w-4xl mx-auto px-4 py-8 text-center text-slate-400 text-sm">
-        <p>© 2026 RecargaFast. Este é um ambiente simulado.</p>
-    </footer>
+    </div>
 
     <!-- Login Modal -->
     <div id="login-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-fade-in">
@@ -292,7 +298,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
-        import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+        import { getFirestore, doc, onSnapshot, getDoc, setDoc, deleteDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
         // Firebase Config
         const firebaseConfig = {
@@ -309,19 +315,15 @@
         const db = getFirestore(app);
         const googleProvider = new GoogleAuthProvider();
 
-        // Data
-        const OPERATORS = [
-            { id: 'vivo', name: 'Vivo', color: 'bg-purple-600' },
-            { id: 'claro', name: 'Claro', color: 'bg-red-600' },
-            { id: 'tim', name: 'TIM', color: 'bg-blue-600' },
-            { id: 'correios', name: 'Correios', color: 'bg-yellow-500' }
-        ];
-
+        // Data Dinâmica agora ligada ao banco
+        let OPERATORS = [];
         let AMOUNTS = [];
+        let isAdmin = false;
 
         // State
         let state = {
             step: 'input',
+            currentView: 'app',
             phone: '',
             operator: null,
             amount: null,
@@ -339,6 +341,20 @@
             btnNew: document.getElementById('btn-new'),
             logoBtn: document.getElementById('logo-btn'),
             
+            views: {
+                app: document.getElementById('view-app'),
+                admin: document.getElementById('view-admin')
+            },
+            
+            admin: {
+                btnOpen: document.getElementById('btn-admin-panel'),
+                btnBack: document.getElementById('btn-back-home'),
+                opList: document.getElementById('admin-operators-list'),
+                pkgList: document.getElementById('admin-packages-list'),
+                formOp: document.getElementById('form-add-operator'),
+                formPkg: document.getElementById('form-add-package')
+            },
+
             steps: {
                 input: document.getElementById('step-input'),
                 checkout: document.getElementById('step-checkout'),
@@ -394,29 +410,116 @@
         // Initialize Icons
         lucide.createIcons();
 
-        // Render Functions
-        async function fetchCatalog() {
+        // Database and Config Functions
+        async function loadConfig() {
             try {
-                const response = await fetch('/api/catalog');
-                
-                if (!response.ok) {
-                    const errorText = await response.text();
-                    console.error("Erro na resposta do catálogo:", errorText);
-                    throw new Error(`O servidor retornou um erro ${response.status} ao carregar o catálogo.`);
+                // Traz Operadoras do Banco
+                const opsSnap = await getDocs(collection(db, 'operators'));
+                if (opsSnap.empty) {
+                    const defaultOps = [
+                        { id: 'vivo', name: 'Vivo', color: 'bg-purple-600' },
+                        { id: 'claro', name: 'Claro', color: 'bg-red-600' },
+                        { id: 'tim', name: 'TIM', color: 'bg-blue-600' },
+                        { id: 'correios', name: 'Correios', color: 'bg-yellow-500' }
+                    ];
+                    for (const op of defaultOps) await setDoc(doc(db, 'operators', op.id), op);
+                    OPERATORS = defaultOps;
+                } else {
+                    OPERATORS = opsSnap.docs.map(d => ({id: d.id, ...d.data()}));
                 }
-                
-                AMOUNTS = await response.json();
+
+                // Traz Pacotes de Recarga do Banco
+                const pkgsSnap = await getDocs(collection(db, 'packages'));
+                if (pkgsSnap.empty) {
+                    const defaultPkgs = [
+                        { id: '1', value: 15, pay: 12, discount: '20% OFF' },
+                        { id: '2', value: 20, pay: 15, discount: '25% OFF' },
+                        { id: '3', value: 30, pay: 20, discount: '33% OFF', popular: true },
+                        { id: '4', value: 40, pay: 30, discount: '25% OFF' },
+                        { id: '5', value: 50, pay: 35, discount: '30% OFF' }
+                    ];
+                    for (const pkg of defaultPkgs) await setDoc(doc(db, 'packages', pkg.id), pkg);
+                    AMOUNTS = defaultPkgs;
+                } else {
+                    AMOUNTS = pkgsSnap.docs.map(d => ({id: d.id, ...d.data()})).sort((a,b) => Number(a.value) - Number(b.value));
+                }
+
+                renderOperators();
                 renderAmounts();
+                if (state.currentView === 'admin') renderAdminPanel();
             } catch (error) {
-                console.error("Erro ao carregar catálogo", error);
-                // Fallback para mock se estivermos no ambiente de teste do canvas
-                AMOUNTS = [
-                    { id: 1, value: 15, pay: 12, discount: '20% OFF (Simulação)' },
-                    { id: 3, value: 30, pay: 20, discount: '33% OFF (Simulação)', popular: true },
-                ];
+                console.error("Erro ao carregar banco de dados", error);
+            }
+        }
+
+        // View Control e Painel Admin
+        function switchView(viewName) {
+            state.currentView = viewName;
+            DOM.views.app.classList.add('hidden');
+            DOM.views.admin.classList.add('hidden');
+            DOM.views[viewName].classList.remove('hidden');
+            
+            if (viewName === 'admin') renderAdminPanel();
+            if (viewName === 'app') {
+                renderOperators();
                 renderAmounts();
             }
         }
+
+        DOM.admin.btnOpen.addEventListener('click', () => switchView('admin'));
+        DOM.admin.btnBack.addEventListener('click', () => switchView('app'));
+
+        function renderAdminPanel() {
+            DOM.admin.opList.innerHTML = OPERATORS.map(op => `
+                <div class="flex items-center justify-between p-3 bg-slate-50 border border-slate-100 rounded-xl">
+                    <div class="flex items-center gap-3">
+                        <div class="w-4 h-4 rounded-full ${op.color}"></div>
+                        <span class="font-bold text-slate-700 text-sm">${op.name}</span>
+                    </div>
+                    <button onclick="window.deleteItem('operators', '${op.id}')" class="text-red-500 hover:text-red-700 p-1"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                </div>
+            `).join('');
+
+            DOM.admin.pkgList.innerHTML = AMOUNTS.map(pkg => `
+                <div class="flex items-center justify-between p-3 bg-slate-50 border border-slate-100 rounded-xl">
+                    <div class="flex flex-col">
+                        <span class="font-bold text-slate-800 text-sm">R$ ${Number(pkg.value).toFixed(2)} por R$ ${Number(pkg.pay).toFixed(2)}</span>
+                        <span class="text-xs text-emerald-600 font-semibold">${pkg.discount} ${pkg.popular ? '⭐' : ''}</span>
+                    </div>
+                    <button onclick="window.deleteItem('packages', '${pkg.id}')" class="text-red-500 hover:text-red-700 p-1"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                </div>
+            `).join('');
+            lucide.createIcons();
+        }
+
+        window.deleteItem = async (collectionName, id) => {
+            if(confirm('Tem certeza que deseja remover este item?')) {
+                await deleteDoc(doc(db, collectionName, id));
+                await loadConfig();
+            }
+        };
+
+        DOM.admin.formOp.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('op-name').value;
+            const color = document.getElementById('op-color').value;
+            const id = name.toLowerCase().replace(/\s+/g, '');
+            await setDoc(doc(db, 'operators', id), { id, name, color });
+            document.getElementById('form-add-operator').reset();
+            await loadConfig();
+        });
+
+        DOM.admin.formPkg.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const value = parseFloat(document.getElementById('pkg-value').value);
+            const pay = parseFloat(document.getElementById('pkg-pay').value);
+            const discount = document.getElementById('pkg-discount').value;
+            const popular = document.getElementById('pkg-popular').checked;
+            const id = Date.now().toString(); 
+            await setDoc(doc(db, 'packages', id), { id, value, pay, discount, popular });
+            document.getElementById('form-add-package').reset();
+            await loadConfig();
+        });
 
         function renderOperators() {
             DOM.operatorsGrid.innerHTML = OPERATORS.map(op => {
@@ -662,15 +765,38 @@
         }
 
         // Firebase Auth Listeners
-        onAuthStateChanged(auth, (user) => {
+        onAuthStateChanged(auth, async (user) => {
             if (user) {
                 DOM.auth.btnOpen.classList.add('hidden');
                 DOM.auth.userLoggedIn.classList.remove('hidden');
                 DOM.auth.userName.textContent = user.displayName || user.email.split('@')[0];
                 DOM.auth.userName.title = user.email;
+                
+                // Validação de Admin no Firestore
+                const userRef = doc(db, 'users', user.uid);
+                const userSnap = await getDoc(userRef);
+                
+                if (!userSnap.exists()) {
+                    // Se for o primeiro login do usuário, cria ele no banco sem poderes de admin
+                    await setDoc(userRef, { email: user.email, isAdmin: false });
+                    isAdmin = false;
+                } else {
+                    // Verifica se tem o selo de admin
+                    isAdmin = userSnap.data().isAdmin === true;
+                }
+
+                if (isAdmin) {
+                    DOM.auth.btnAdmin.classList.remove('hidden');
+                } else {
+                    DOM.auth.btnAdmin.classList.add('hidden');
+                }
+
             } else {
                 DOM.auth.btnOpen.classList.remove('hidden');
                 DOM.auth.userLoggedIn.classList.add('hidden');
+                DOM.auth.btnAdmin.classList.add('hidden');
+                isAdmin = false;
+                if (state.currentView === 'admin') switchView('app');
             }
         });
 
@@ -724,9 +850,8 @@
             await signOut(auth);
         });
 
-        // Init
-        fetchCatalog();
-        renderOperators();
+        // Init App (Mudamos de fetchCatalog para a nova função que engloba tudo)
+        loadConfig();
     </script>
 </body>
 </html>
