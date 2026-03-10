@@ -31,14 +31,17 @@ export default async function handler(req, res) {
     const selectedPackage = CATALOG[packageId];
     if (!selectedPackage) return res.status(400).json({ error: 'Pacote inválido.' });
 
-    // Seu token do Mercado Pago
-    const MP_ACCESS_TOKEN = 'APP_USR-5026206862993903-010320-ffe5ffb1e7ac9902baee0d45126bfa08-2485490772';
-
     // Configura SDK v2 do MP
+    const MP_ACCESS_TOKEN = 'APP_USR-5026206862993903-010320-ffe5ffb1e7ac9902baee0d45126bfa08-2485490772';
     const client = new MercadoPagoConfig({ accessToken: MP_ACCESS_TOKEN });
     const payment = new Payment(client);
     
     const paymentIdStr = `recarga_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+
+    // Criamos o URL garantindo que tem https:// (e deixamos o seu domínio fixo como segurança extra)
+    const webhookUrl = process.env.VERCEL_URL 
+      ? `https://${process.env.VERCEL_URL}/api/webhook` 
+      : 'https://cryptopulse-kappa.vercel.app/api/webhook';
 
     // Criar PIX
     const paymentResponse = await payment.create({
@@ -48,7 +51,7 @@ export default async function handler(req, res) {
         payment_method_id: 'pix',
         payer: { email: 'contato@recargafast.com' },
         external_reference: paymentIdStr,
-        notification_url: `${process.env.VERCEL_URL}/api/webhook` // Vercel passa o URL automaticamente
+        notification_url: webhookUrl
       }
     });
 
