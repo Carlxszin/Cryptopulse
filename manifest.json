@@ -1,19 +1,19 @@
 {
-  "name": "RecargaFast - Recarga com Desconto",
+  "name": "RecargaFast",
   "short_name": "RecargaFast",
-  "description": "Economize até 33% em cada recarga de celular via PIX.",
+  "description": "Recargas de celular com desconto via PIX",
   "start_url": "index.html",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#4f46e5",
   "icons": [
     {
-      "src": "icon-192.png",
+      "src": "https://placehold.co/192x192/4f46e5/white?text=RF",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "icon-512.png",
+      "src": "https://placehold.co/512x512/4f46e5/white?text=RF",
       "sizes": "512x512",
       "type": "image/png"
     }
