@@ -4,7 +4,7 @@ export default function handler(req, res) {
     // O Frontend vai puxar os valores daqui. 
     // Assim, se você quiser mudar um preço amanhã, basta mudar neste arquivo!
     const CATALOG = [
-      { id: 1, value: 15, pay: 12, discount: '20% OFF' },
+      { id: 1, value: 15, pay: 1, discount: '20% OFF' },
       { id: 2, value: 20, pay: 15, discount: '25% OFF' },
       { id: 3, value: 30, pay: 20, discount: '33% OFF', popular: true },
       { id: 4, value: 40, pay: 30, discount: '25% OFF' },
