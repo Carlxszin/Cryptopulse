@@ -1,4 +1,4 @@
-const CACHE_NAME = 'recargafast-v3'; // Incremente este número para forçar atualização
+const CACHE_NAME = 'recargafast-v4'; // Incremente este número para forçar atualização
 const ASSETS = [
   './',
   './index.html',
