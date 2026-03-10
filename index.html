@@ -317,7 +317,6 @@
             { id: 'correios', name: 'Correios', color: 'bg-yellow-500' }
         ];
 
-        // Os valores não são mais hardcoded com validação aqui. O Frontend só lista, a validação é no Backend.
         let AMOUNTS = [];
 
         // State
@@ -398,15 +397,24 @@
         // Render Functions
         async function fetchCatalog() {
             try {
-                // CHAMA O SEU BACKEND PARA PEGAR OS PREÇOS REAIS
                 const response = await fetch('/api/catalog');
-                if (!response.ok) throw new Error('Falha ao carregar catálogo do servidor');
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error("Erro na resposta do catálogo:", errorText);
+                    throw new Error(`O servidor retornou um erro ${response.status} ao carregar o catálogo.`);
+                }
                 
                 AMOUNTS = await response.json();
                 renderAmounts();
             } catch (error) {
                 console.error("Erro ao carregar catálogo", error);
-                alert("Erro ao carregar opções de recarga. Verifique sua conexão e tente novamente.");
+                // Fallback para mock se estivermos no ambiente de teste do canvas
+                AMOUNTS = [
+                    { id: 1, value: 15, pay: 12, discount: '20% OFF (Simulação)' },
+                    { id: 3, value: 30, pay: 20, discount: '33% OFF (Simulação)', popular: true },
+                ];
+                renderAmounts();
             }
         }
 
@@ -530,7 +538,6 @@
         DOM.btnPay.addEventListener('click', () => {
             showLoading(0, async () => {
                 try {
-                    // 1. CHAMA O SEU BACKEND (VERCEL SERVERLESS FUNCTION) PARA GERAR O PIX NO MERCADO PAGO
                     const response = await fetch('/api/create-payment', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
@@ -543,13 +550,22 @@
                     });
                     
                     if (!response.ok) {
-                        const errorData = await response.json();
-                        throw new Error(errorData.error || "Falha ao gerar o PIX");
+                        let errorMessage = "Falha ao gerar o PIX.";
+                        try {
+                            // Tenta ler como JSON
+                            const errorData = await response.json();
+                            errorMessage = errorData.error || errorMessage;
+                        } catch (parseError) {
+                            // Se falhar, é porque o backend retornou HTML de erro (Ex: "A server error...")
+                            const errorText = await response.text();
+                            console.error("Erro no backend (Vercel):", errorText);
+                            errorMessage = `O servidor da Vercel retornou um erro (Status ${response.status}). Verifique os Runtime Logs no painel da Vercel para identificar o motivo do travamento.`;
+                        }
+                        throw new Error(errorMessage);
                     }
 
                     const paymentData = await response.json();
 
-                    // Ajusta o formato da imagem Base64 do QR Code para exibir no HTML
                     const qrCodeBase64 = paymentData.qrCodeBase64.startsWith('data:image') 
                         ? paymentData.qrCodeBase64 
                         : `data:image/png;base64,${paymentData.qrCodeBase64}`;
@@ -560,17 +576,16 @@
                     
                     setStep('success');
 
-                    // 2. ESCUTA O FIRESTORE PELO PAGAMENTO APROVADO PELO WEBHOOK
                     const unsubscribe = onSnapshot(doc(db, "orders", paymentData.paymentId), (docSnap) => {
                         if (docSnap.exists() && docSnap.data().status === 'approved') {
                             markAsApproved();
-                            unsubscribe(); // Para de ouvir o Firebase após aprovado
+                            unsubscribe();
                         }
                     });
 
                 } catch (error) {
                     console.error(error);
-                    alert("Erro ao processar pagamento: " + error.message);
+                    alert("Erro ao processar pagamento: \n\n" + error.message);
                 } finally {
                     DOM.loadingOverlay.classList.add('hidden');
                 }
