@@ -1,493 +1,633 @@
-import React, { useState, useEffect } from 'react';
-import { Smartphone, Zap, CheckCircle2, ShieldCheck, ChevronRight, QrCode, ArrowLeft, Tag, User, LogOut, Mail, X } from 'lucide-react';
-import { initializeApp } from "firebase/app";
-import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, signOut } from "firebase/auth";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyBA_qqcT9NC9wCMFDPR34WMt6NYIMGB35w",
-  authDomain: "recarga-eff36.firebaseapp.com",
-  projectId: "recarga-eff36",
-  storageBucket: "recarga-eff36.firebasestorage.app",
-  messagingSenderId: "209300037391",
-  appId: "1:209300037391:web:8420372be4d3ba6e28687a"
-};
-
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const googleProvider = new GoogleAuthProvider();
-
-const OPERATORS = [
-  { id: 'vivo', name: 'Vivo', color: 'bg-purple-600', hover: 'hover:bg-purple-700' },
-  { id: 'claro', name: 'Claro', color: 'bg-red-600', hover: 'hover:bg-red-700' },
-  { id: 'tim', name: 'TIM', color: 'bg-blue-600', hover: 'hover:bg-blue-700' },
-  { id: 'correios', name: 'Correios', color: 'bg-yellow-500', hover: 'hover:bg-yellow-600' }
-];
-
-const AMOUNTS = [
-  { id: 1, value: 15, pay: 12, discount: '20% OFF' },
-  { id: 2, value: 20, pay: 15, discount: '25% OFF' },
-  { id: 3, value: 30, pay: 20, discount: '33% OFF', popular: true },
-  { id: 4, value: 40, pay: 30, discount: '25% OFF' },
-  { id: 5, value: 50, pay: 35, discount: '30% OFF' },
-];
-
-export default function App() {
-  const [step, setStep] = useState('input'); // input, checkout, success
-  const [phone, setPhone] = useState('');
-  const [selectedOperator, setSelectedOperator] = useState(null);
-  const [selectedAmount, setSelectedAmount] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
-
-  // Auth State
-  const [user, setUser] = useState(null);
-  const [showLoginModal, setShowLoginModal] = useState(false);
-  const [loginMode, setLoginMode] = useState('login'); // 'login' or 'register'
-  const [authEmail, setAuthEmail] = useState('');
-  const [authPassword, setAuthPassword] = useState('');
-  const [authError, setAuthError] = useState('');
-  const [isAuthLoading, setIsAuthLoading] = useState(false);
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
-    });
-    return () => unsubscribe();
-  }, []);
-
-  const handleEmailAuth = async (e) => {
-    e.preventDefault();
-    setIsAuthLoading(true);
-    setAuthError('');
-    try {
-      if (loginMode === 'login') {
-        await signInWithEmailAndPassword(auth, authEmail, authPassword);
-      } else {
-        await createUserWithEmailAndPassword(auth, authEmail, authPassword);
-      }
-      setShowLoginModal(false);
-    } catch (error) {
-      setAuthError(error.message.replace('Firebase: ', ''));
-    } finally {
-      setIsAuthLoading(false);
-    }
-  };
-
-  const handleGoogleLogin = async () => {
-    setIsAuthLoading(true);
-    setAuthError('');
-    try {
-      await signInWithPopup(auth, googleProvider);
-      setShowLoginModal(false);
-    } catch (error) {
-      setAuthError(error.message.replace('Firebase: ', ''));
-    } finally {
-      setIsAuthLoading(false);
-    }
-  };
-
-  const handleLogout = async () => {
-    await signOut(auth);
-  };
-
-  // Formata o telefone (XX) XXXXX-XXXX
-  const handlePhoneChange = (e) => {
-    let val = e.target.value.replace(/\D/g, '');
-    if (val.length > 11) val = val.slice(0, 11);
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RecargaFast - Recarga com Desconto</title>
     
-    if (val.length > 2) {
-      val = `(${val.slice(0, 2)}) ${val.slice(2)}`;
-    }
-    if (val.length > 10) {
-      val = `${val.slice(0, 10)}-${val.slice(10)}`;
-    }
-    setPhone(val);
-  };
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
 
-  const isFormValid = phone.length >= 14 && selectedOperator && selectedAmount;
-
-  const handleContinue = () => {
-    if (isFormValid) {
-      setIsLoading(true);
-      setTimeout(() => {
-        setIsLoading(false);
-        setStep('checkout');
-      }, 600);
-    }
-  };
-
-  const handlePayment = () => {
-    setIsLoading(true);
-    setTimeout(() => {
-      setIsLoading(false);
-      setStep('success');
-    }, 1500);
-  };
-
-  const resetFlow = () => {
-    setStep('input');
-    setPhone('');
-    setSelectedOperator(null);
-    setSelectedAmount(null);
-  };
-
-  return (
-    <div className="min-h-screen bg-slate-50 font-sans text-slate-800 selection:bg-indigo-200">
-      {/* Navbar */}
-      <nav className="bg-white shadow-sm sticky top-0 z-10">
-        <div className="max-w-4xl mx-auto px-4 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2 cursor-pointer" onClick={() => step !== 'success' && setStep('input')}>
-            <div className="bg-indigo-600 p-2 rounded-xl">
-              <Zap className="w-5 h-5 text-white fill-white" />
-            </div>
-            <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-violet-600">
-              RecargaFast
-            </span>
-          </div>
-          <div className="flex items-center gap-4 text-sm font-medium">
-            <div className="hidden md:flex items-center gap-2 text-slate-500 mr-2">
-              <ShieldCheck className="w-4 h-4 text-emerald-500" />
-              <span>Site Seguro</span>
-            </div>
-            
-            {user ? (
-              <div className="flex items-center gap-3 bg-slate-50 py-1.5 px-3 rounded-full border border-slate-200">
-                <span className="text-slate-700 font-semibold truncate max-w-[120px]" title={user.email}>
-                  {user.displayName || user.email.split('@')[0]}
-                </span>
-                <button onClick={handleLogout} className="text-slate-400 hover:text-red-500 transition-colors" title="Sair">
-                  <LogOut className="w-4 h-4" />
-                </button>
-              </div>
-            ) : (
-              <button 
-                onClick={() => setShowLoginModal(true)}
-                className="flex items-center gap-2 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 py-1.5 px-4 rounded-full transition-colors"
-              >
-                <User className="w-4 h-4" />
-                Entrar
-              </button>
-            )}
-          </div>
-        </div>
-      </nav>
-
-      <main className="max-w-4xl mx-auto px-4 py-8 md:py-12 flex flex-col md:flex-row gap-8">
+    <style>
+        /* Custom animations */
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(1rem); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideRight { from { opacity: 0; transform: translateX(2rem); } to { opacity: 1; transform: translateX(0); } }
+        @keyframes zoomIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
         
-        {/* Left Column - Marketing / Info */}
-        <div className="w-full md:w-1/2 flex flex-col justify-center space-y-6">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-indigo-100 text-indigo-700 w-fit text-sm font-semibold">
-            <Tag className="w-4 h-4" />
-            Oferta por tempo limitado
-          </div>
-          <h1 className="text-4xl md:text-5xl font-extrabold leading-tight text-slate-900">
-            Recarregue agora e ganhe até <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-violet-500">33% de Desconto</span>
-          </h1>
-          <p className="text-lg text-slate-600">
-            Ficou sem crédito? Aproveite nossas ofertas exclusivas. O saldo cai na hora e você economiza de verdade pagando com PIX.
-          </p>
-          
-          {/* Trust indicators */}
-          <div className="flex flex-wrap gap-4 pt-4">
-            <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-lg shadow-sm border border-slate-100">
-              <Zap className="w-5 h-5 text-amber-500" />
-              <span className="text-sm font-medium">Cai na hora</span>
+        .animate-fade-in { animation: fadeIn 0.3s ease-out forwards; }
+        .animate-slide-up { animation: slideUp 0.5s ease-out forwards; }
+        .animate-slide-right { animation: slideRight 0.3s ease-out forwards; }
+        .animate-zoom-in { animation: zoomIn 0.3s ease-out forwards; }
+        
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body class="min-h-screen bg-slate-50 font-sans text-slate-800 selection:bg-indigo-200">
+
+    <!-- Navbar -->
+    <nav class="bg-white shadow-sm sticky top-0 z-10">
+        <div class="max-w-4xl mx-auto px-4 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-2 cursor-pointer" id="logo-btn">
+                <div class="bg-indigo-600 p-2 rounded-xl">
+                    <i data-lucide="zap" class="w-5 h-5 text-white fill-white"></i>
+                </div>
+                <span class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-violet-600">
+                    RecargaFast
+                </span>
             </div>
-            <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-lg shadow-sm border border-slate-100">
-              <ShieldCheck className="w-5 h-5 text-emerald-500" />
-              <span className="text-sm font-medium">100% Seguro</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Right Column - The App Card */}
-        <div className="w-full md:w-1/2">
-          <div className="bg-white rounded-3xl shadow-xl shadow-indigo-100/50 border border-slate-100 overflow-hidden relative min-h-[500px] flex flex-col">
-            
-            {/* Loading Overlay */}
-            {isLoading && (
-              <div className="absolute inset-0 bg-white/80 backdrop-blur-sm z-20 flex items-center justify-center">
-                <div className="w-12 h-12 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>
-              </div>
-            )}
-
-            {/* STEP 1: INPUT */}
-            {step === 'input' && (
-              <div className="p-6 md:p-8 flex flex-col h-full animate-in fade-in slide-in-from-bottom-4 duration-500">
-                <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
-                  <Smartphone className="w-6 h-6 text-indigo-600" />
-                  Nova Recarga
-                </h2>
-
-                {/* Phone Input */}
-                <div className="mb-6">
-                  <label className="block text-sm font-medium text-slate-700 mb-2">Número do Celular</label>
-                  <input
-                    type="tel"
-                    placeholder="(00) 00000-0000"
-                    value={phone}
-                    onChange={handlePhoneChange}
-                    className="w-full px-4 py-4 bg-slate-50 border border-slate-200 rounded-xl text-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all font-medium placeholder:font-normal"
-                  />
+            <div class="flex items-center gap-4 text-sm font-medium">
+                <div class="hidden md:flex items-center gap-2 text-slate-500 mr-2">
+                    <i data-lucide="shield-check" class="w-4 h-4 text-emerald-500"></i>
+                    <span>Site Seguro</span>
                 </div>
-
-                {/* Operator Selection */}
-                <div className="mb-6">
-                  <label className="block text-sm font-medium text-slate-700 mb-2">Operadora</label>
-                  <div className="grid grid-cols-4 gap-2">
-                    {OPERATORS.map(op => (
-                      <button
-                        key={op.id}
-                        onClick={() => setSelectedOperator(op)}
-                        className={`py-3 rounded-xl font-bold text-sm transition-all flex items-center justify-center ${
-                          selectedOperator?.id === op.id 
-                            ? `${op.color} text-white shadow-md transform scale-105` 
-                            : 'bg-slate-50 text-slate-500 border border-slate-200 hover:bg-slate-100'
-                        }`}
-                      >
-                        {op.name}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Amount Selection */}
-                <div className="mb-8 flex-1">
-                  <label className="block text-sm font-medium text-slate-700 mb-2">Valor da Recarga</label>
-                  <div className="grid grid-cols-2 gap-3">
-                    {AMOUNTS.map(amt => (
-                      <button
-                        key={amt.id}
-                        onClick={() => setSelectedAmount(amt)}
-                        className={`relative p-3 rounded-xl border-2 text-left transition-all ${
-                          selectedAmount?.id === amt.id
-                            ? 'border-indigo-600 bg-indigo-50/50'
-                            : 'border-slate-100 bg-white hover:border-indigo-200'
-                        } ${amt.popular && selectedAmount?.id !== amt.id ? 'border-amber-200 bg-amber-50/30' : ''}`}
-                      >
-                        {amt.popular && (
-                          <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-amber-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full whitespace-nowrap shadow-sm">
-                            MAIS ESCOLHIDO
-                          </span>
-                        )}
-                        <div className="text-slate-500 line-through text-xs">R$ {amt.value.toFixed(2)}</div>
-                        <div className="font-bold text-lg text-slate-800">R$ {amt.pay.toFixed(2)}</div>
-                        <div className="mt-1 text-xs font-bold text-emerald-600 flex items-center gap-1">
-                          <Tag className="w-3 h-3" /> {amt.discount}
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Submit Button */}
-                <button
-                  onClick={handleContinue}
-                  disabled={!isFormValid}
-                  className={`w-full py-4 rounded-xl font-bold text-lg flex items-center justify-center gap-2 transition-all mt-auto ${
-                    isFormValid 
-                      ? 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-lg shadow-indigo-200 cursor-pointer hover:-translate-y-0.5' 
-                      : 'bg-slate-100 text-slate-400 cursor-not-allowed'
-                  }`}
-                >
-                  Continuar
-                  <ChevronRight className="w-5 h-5" />
-                </button>
-              </div>
-            )}
-
-            {/* STEP 2: CHECKOUT */}
-            {step === 'checkout' && (
-              <div className="p-6 md:p-8 flex flex-col h-full animate-in fade-in slide-in-from-right-8 duration-300">
-                <button 
-                  onClick={() => setStep('input')}
-                  className="w-fit p-2 -ml-2 mb-4 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
-                >
-                  <ArrowLeft className="w-5 h-5" />
-                </button>
                 
-                <h2 className="text-2xl font-bold mb-6 text-slate-800">Pagamento</h2>
-
-                <div className="bg-slate-50 p-5 rounded-2xl border border-slate-100 mb-6 space-y-4">
-                  <div className="flex justify-between items-center">
-                    <span className="text-slate-500 text-sm">Número</span>
-                    <span className="font-semibold text-slate-800">{phone}</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-slate-500 text-sm">Operadora</span>
-                    <span className={`font-bold px-2 py-0.5 rounded text-xs text-white ${selectedOperator?.color}`}>
-                      {selectedOperator?.name}
-                    </span>
-                  </div>
-                  <div className="h-px w-full bg-slate-200 my-2"></div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-slate-500 text-sm">Valor Original</span>
-                    <span className="text-slate-500 line-through">R$ {selectedAmount?.value.toFixed(2)}</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-emerald-600 font-medium text-sm">Desconto aplicado</span>
-                    <span className="text-emerald-600 font-medium">- R$ {(selectedAmount?.value - selectedAmount?.pay).toFixed(2)}</span>
-                  </div>
-                  <div className="h-px w-full bg-slate-200 my-2"></div>
-                  <div className="flex justify-between items-end">
-                    <span className="text-slate-800 font-semibold">Total a pagar</span>
-                    <span className="text-3xl font-black text-indigo-600">R$ {selectedAmount?.pay.toFixed(2)}</span>
-                  </div>
+                <!-- User Area (Dynamic) -->
+                <div id="user-logged-in" class="hidden flex items-center gap-3 bg-slate-50 py-1.5 px-3 rounded-full border border-slate-200">
+                    <span id="user-name-display" class="text-slate-700 font-semibold truncate max-w-[120px]"></span>
+                    <button id="btn-logout" class="text-slate-400 hover:text-red-500 transition-colors" title="Sair">
+                        <i data-lucide="log-out" class="w-4 h-4"></i>
+                    </button>
                 </div>
-
-                <div className="flex-1">
-                  <div className="bg-emerald-50 border border-emerald-100 p-4 rounded-xl flex items-start gap-3 mb-6">
-                    <QrCode className="w-6 h-6 text-emerald-600 flex-shrink-0 mt-0.5" />
-                    <div>
-                      <h4 className="font-semibold text-emerald-800">Pague com PIX</h4>
-                      <p className="text-xs text-emerald-600 mt-1">Aprovação imediata. O saldo cai na hora no seu celular.</p>
-                    </div>
-                  </div>
-                </div>
-
-                <button
-                  onClick={handlePayment}
-                  className="w-full py-4 rounded-xl font-bold text-lg flex items-center justify-center gap-2 bg-emerald-500 text-white hover:bg-emerald-600 shadow-lg shadow-emerald-200 transition-all hover:-translate-y-0.5 mt-auto"
-                >
-                  <QrCode className="w-5 h-5" />
-                  Gerar PIX Copia e Cola
+                
+                <button id="btn-open-login" class="flex items-center gap-2 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 py-1.5 px-4 rounded-full transition-colors">
+                    <i data-lucide="user" class="w-4 h-4"></i>
+                    Entrar
                 </button>
-              </div>
-            )}
-
-            {/* STEP 3: SUCCESS */}
-            {step === 'success' && (
-              <div className="p-6 md:p-8 flex flex-col items-center justify-center h-full text-center animate-in zoom-in-95 duration-500 flex-1">
-                <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mb-6">
-                  <CheckCircle2 className="w-10 h-10 text-emerald-500" />
-                </div>
-                <h2 className="text-3xl font-bold mb-2 text-slate-800">Recarga em andamento!</h2>
-                <p className="text-slate-500 mb-8 max-w-xs">
-                  Aguardando a confirmação do pagamento. Assim que aprovado, o valor de <strong className="text-slate-700">R$ {selectedAmount?.value.toFixed(2)}</strong> será creditado no número <strong className="text-slate-700">{phone}</strong>.
-                </p>
-
-                {/* Mock QR Code area just for visual completeness if we assume they are paying now */}
-                <div className="w-full bg-slate-50 p-4 rounded-xl border border-slate-200 mb-8">
-                   <p className="text-xs text-slate-500 mb-2 uppercase font-bold tracking-wider">Código PIX (Simulação)</p>
-                   <div className="bg-white border border-slate-200 p-3 rounded-lg text-left text-xs text-slate-400 font-mono truncate select-all">
-                     00020126580014br.gov.bcb.pix0136123e4567-e89b-12d3...
-                   </div>
-                   <button className="mt-3 text-sm font-semibold text-indigo-600 hover:text-indigo-700">Copiar Código</button>
-                </div>
-
-                <button
-                  onClick={resetFlow}
-                  className="w-full py-3.5 rounded-xl font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all mt-auto"
-                >
-                  Fazer nova recarga
-                </button>
-              </div>
-            )}
-
-          </div>
+            </div>
         </div>
-      </main>
+    </nav>
 
-      {/* Simple Footer */}
-      <footer className="max-w-4xl mx-auto px-4 py-8 text-center text-slate-400 text-sm">
+    <main class="max-w-4xl mx-auto px-4 py-8 md:py-12 flex flex-col md:flex-row gap-8">
+        
+        <!-- Left Column - Marketing -->
+        <div class="w-full md:w-1/2 flex flex-col justify-center space-y-6">
+            <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-indigo-100 text-indigo-700 w-fit text-sm font-semibold">
+                <i data-lucide="tag" class="w-4 h-4"></i>
+                Oferta por tempo limitado
+            </div>
+            <h1 class="text-4xl md:text-5xl font-extrabold leading-tight text-slate-900">
+                Recarregue agora e ganhe até <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-violet-500">33% de Desconto</span>
+            </h1>
+            <p class="text-lg text-slate-600">
+                Ficou sem crédito? Aproveite nossas ofertas exclusivas. O saldo cai na hora e você economiza de verdade pagando com PIX.
+            </p>
+            
+            <div class="flex flex-wrap gap-4 pt-4">
+                <div class="flex items-center gap-2 bg-white px-4 py-2 rounded-lg shadow-sm border border-slate-100">
+                    <i data-lucide="zap" class="w-5 h-5 text-amber-500"></i>
+                    <span class="text-sm font-medium">Cai na hora</span>
+                </div>
+                <div class="flex items-center gap-2 bg-white px-4 py-2 rounded-lg shadow-sm border border-slate-100">
+                    <i data-lucide="shield-check" class="w-5 h-5 text-emerald-500"></i>
+                    <span class="text-sm font-medium">100% Seguro</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column - The App Card -->
+        <div class="w-full md:w-1/2">
+            <div class="bg-white rounded-3xl shadow-xl shadow-indigo-100/50 border border-slate-100 overflow-hidden relative min-h-[500px] flex flex-col">
+                
+                <!-- Loading Overlay -->
+                <div id="loading-overlay" class="hidden absolute inset-0 bg-white/80 backdrop-blur-sm z-20 flex items-center justify-center">
+                    <div class="w-12 h-12 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>
+                </div>
+
+                <!-- STEP 1: INPUT -->
+                <div id="step-input" class="p-6 md:p-8 flex flex-col h-full animate-slide-up">
+                    <h2 class="text-2xl font-bold mb-6 flex items-center gap-2">
+                        <i data-lucide="smartphone" class="w-6 h-6 text-indigo-600"></i>
+                        Nova Recarga
+                    </h2>
+
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-slate-700 mb-2">Número do Celular</label>
+                        <input
+                            type="tel"
+                            id="phone-input"
+                            placeholder="(00) 00000-0000"
+                            class="w-full px-4 py-4 bg-slate-50 border border-slate-200 rounded-xl text-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all font-medium placeholder:font-normal"
+                        />
+                    </div>
+
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-slate-700 mb-2">Operadora</label>
+                        <div id="operators-grid" class="grid grid-cols-4 gap-2">
+                            <!-- Injected via JS -->
+                        </div>
+                    </div>
+
+                    <div class="mb-8 flex-1">
+                        <label class="block text-sm font-medium text-slate-700 mb-2">Valor da Recarga</label>
+                        <div id="amounts-grid" class="grid grid-cols-2 gap-3">
+                            <!-- Injected via JS -->
+                        </div>
+                    </div>
+
+                    <button
+                        id="btn-continue"
+                        disabled
+                        class="w-full py-4 rounded-xl font-bold text-lg flex items-center justify-center gap-2 transition-all mt-auto bg-slate-100 text-slate-400 cursor-not-allowed"
+                    >
+                        Continuar
+                        <i data-lucide="chevron-right" class="w-5 h-5"></i>
+                    </button>
+                </div>
+
+                <!-- STEP 2: CHECKOUT -->
+                <div id="step-checkout" class="hidden p-6 md:p-8 flex flex-col h-full animate-slide-right">
+                    <button id="btn-back" class="w-fit p-2 -ml-2 mb-4 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors">
+                        <i data-lucide="arrow-left" class="w-5 h-5"></i>
+                    </button>
+                    
+                    <h2 class="text-2xl font-bold mb-6 text-slate-800">Pagamento</h2>
+
+                    <div class="bg-slate-50 p-5 rounded-2xl border border-slate-100 mb-6 space-y-4">
+                        <div class="flex justify-between items-center">
+                            <span class="text-slate-500 text-sm">Número</span>
+                            <span id="checkout-phone" class="font-semibold text-slate-800"></span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-slate-500 text-sm">Operadora</span>
+                            <span id="checkout-operator" class="font-bold px-2 py-0.5 rounded text-xs text-white"></span>
+                        </div>
+                        <div class="h-px w-full bg-slate-200 my-2"></div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-slate-500 text-sm">Valor Original</span>
+                            <span id="checkout-original" class="text-slate-500 line-through"></span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-emerald-600 font-medium text-sm">Desconto aplicado</span>
+                            <span id="checkout-discount" class="text-emerald-600 font-medium"></span>
+                        </div>
+                        <div class="h-px w-full bg-slate-200 my-2"></div>
+                        <div class="flex justify-between items-end">
+                            <span class="text-slate-800 font-semibold">Total a pagar</span>
+                            <span id="checkout-total" class="text-3xl font-black text-indigo-600"></span>
+                        </div>
+                    </div>
+
+                    <div class="flex-1">
+                        <div class="bg-emerald-50 border border-emerald-100 p-4 rounded-xl flex items-start gap-3 mb-6">
+                            <i data-lucide="qr-code" class="w-6 h-6 text-emerald-600 flex-shrink-0 mt-0.5"></i>
+                            <div>
+                                <h4 class="font-semibold text-emerald-800">Pague com PIX</h4>
+                                <p class="text-xs text-emerald-600 mt-1">Aprovação imediata. O saldo cai na hora no seu celular.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button
+                        id="btn-pay"
+                        class="w-full py-4 rounded-xl font-bold text-lg flex items-center justify-center gap-2 bg-emerald-500 text-white hover:bg-emerald-600 shadow-lg shadow-emerald-200 transition-all hover:-translate-y-0.5 mt-auto"
+                    >
+                        <i data-lucide="qr-code" class="w-5 h-5"></i>
+                        Gerar PIX Copia e Cola
+                    </button>
+                </div>
+
+                <!-- STEP 3: SUCCESS -->
+                <div id="step-success" class="hidden p-6 md:p-8 flex flex-col items-center justify-center h-full text-center animate-zoom-in flex-1">
+                    <div class="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mb-6">
+                        <i data-lucide="check-circle-2" class="w-10 h-10 text-emerald-500"></i>
+                    </div>
+                    <h2 class="text-3xl font-bold mb-2 text-slate-800">Recarga em andamento!</h2>
+                    <p class="text-slate-500 mb-8 max-w-xs">
+                        Aguardando a confirmação do pagamento. Assim que aprovado, o valor de <strong id="success-amount" class="text-slate-700"></strong> será creditado no número <strong id="success-phone" class="text-slate-700"></strong>.
+                    </p>
+
+                    <div class="w-full bg-slate-50 p-4 rounded-xl border border-slate-200 mb-8">
+                        <p class="text-xs text-slate-500 mb-2 uppercase font-bold tracking-wider">Código PIX (Simulação)</p>
+                        <div class="bg-white border border-slate-200 p-3 rounded-lg text-left text-xs text-slate-400 font-mono truncate select-all">
+                            00020126580014br.gov.bcb.pix0136123e4567-e89b-12d3...
+                        </div>
+                        <button class="mt-3 text-sm font-semibold text-indigo-600 hover:text-indigo-700">Copiar Código</button>
+                    </div>
+
+                    <button
+                        id="btn-new"
+                        class="w-full py-3.5 rounded-xl font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all mt-auto"
+                    >
+                        Fazer nova recarga
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <footer class="max-w-4xl mx-auto px-4 py-8 text-center text-slate-400 text-sm">
         <p>© 2026 RecargaFast. Este é um ambiente simulado.</p>
-      </footer>
+    </footer>
 
-      {/* Login Modal */}
-      {showLoginModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden relative animate-in zoom-in-95 duration-200">
-            <button 
-              onClick={() => setShowLoginModal(false)}
-              className="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-colors z-10"
-            >
-              <X className="w-5 h-5" />
+    <!-- Login Modal -->
+    <div id="login-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-fade-in">
+        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden relative animate-zoom-in">
+            <button id="btn-close-modal" class="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-colors z-10">
+                <i data-lucide="x" class="w-5 h-5"></i>
             </button>
 
-            <div className="p-8">
-              <h2 className="text-2xl font-bold text-slate-800 mb-1">
-                {loginMode === 'login' ? 'Acesse sua conta' : 'Crie sua conta'}
-              </h2>
-              <p className="text-slate-500 text-sm mb-6">
-                {loginMode === 'login' ? 'Faça login para salvar seus recibos.' : 'Cadastre-se para recargas mais rápidas.'}
-              </p>
+            <div class="p-8">
+                <h2 id="modal-title" class="text-2xl font-bold text-slate-800 mb-1">Acesse sua conta</h2>
+                <p id="modal-subtitle" class="text-slate-500 text-sm mb-6">Faça login para salvar seus recibos.</p>
 
-              <form onSubmit={handleEmailAuth} className="space-y-4 mb-6">
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">E-mail</label>
-                  <input 
-                    type="email" 
-                    required
-                    value={authEmail}
-                    onChange={(e) => setAuthEmail(e.target.value)}
-                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                    placeholder="seu@email.com"
-                  />
+                <form id="auth-form" class="space-y-4 mb-6">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">E-mail</label>
+                        <input 
+                            type="email" id="auth-email" required
+                            class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                            placeholder="seu@email.com"
+                        />
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Senha</label>
+                        <input 
+                            type="password" id="auth-password" required minlength="6"
+                            class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                            placeholder="••••••"
+                        />
+                    </div>
+
+                    <div id="auth-error" class="hidden p-3 bg-red-50 text-red-600 text-sm rounded-lg border border-red-100"></div>
+
+                    <button type="submit" id="btn-submit-auth" class="w-full py-3 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition-colors disabled:opacity-70 flex justify-center items-center gap-2">
+                        <div id="auth-loading" class="hidden w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                        <span id="btn-submit-text">Entrar</span>
+                    </button>
+                </form>
+
+                <div class="relative flex items-center py-2 mb-6">
+                    <div class="flex-grow border-t border-slate-200"></div>
+                    <span class="flex-shrink-0 mx-4 text-slate-400 text-sm">ou</span>
+                    <div class="flex-grow border-t border-slate-200"></div>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Senha</label>
-                  <input 
-                    type="password" 
-                    required
-                    minLength={6}
-                    value={authPassword}
-                    onChange={(e) => setAuthPassword(e.target.value)}
-                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                    placeholder="••••••"
-                  />
-                </div>
 
-                {authError && (
-                  <div className="p-3 bg-red-50 text-red-600 text-sm rounded-lg border border-red-100">
-                    {authError}
-                  </div>
-                )}
-
-                <button 
-                  type="submit" 
-                  disabled={isAuthLoading}
-                  className="w-full py-3 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition-colors disabled:opacity-70 flex justify-center items-center gap-2"
-                >
-                  {isAuthLoading && <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>}
-                  {loginMode === 'login' ? 'Entrar' : 'Cadastrar'}
+                <button id="btn-google-auth" class="w-full py-3 bg-white border border-slate-200 text-slate-700 rounded-xl font-bold hover:bg-slate-50 transition-colors flex items-center justify-center gap-3 mb-6">
+                    <svg class="w-5 h-5" viewBox="0 0 24 24">
+                        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                        <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                        <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                        <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                    </svg>
+                    Continuar com Google
                 </button>
-              </form>
 
-              <div className="relative flex items-center py-2 mb-6">
-                <div className="flex-grow border-t border-slate-200"></div>
-                <span className="flex-shrink-0 mx-4 text-slate-400 text-sm">ou</span>
-                <div className="flex-grow border-t border-slate-200"></div>
-              </div>
-
-              <button 
-                onClick={handleGoogleLogin}
-                disabled={isAuthLoading}
-                className="w-full py-3 bg-white border border-slate-200 text-slate-700 rounded-xl font-bold hover:bg-slate-50 transition-colors flex items-center justify-center gap-3 mb-6"
-              >
-                <svg className="w-5 h-5" viewBox="0 0 24 24">
-                  <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-                  <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-                  <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
-                  <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-                </svg>
-                Continuar com Google
-              </button>
-
-              <p className="text-center text-sm text-slate-500">
-                {loginMode === 'login' ? 'Ainda não tem conta? ' : 'Já tem uma conta? '}
-                <button 
-                  onClick={() => {
-                    setLoginMode(loginMode === 'login' ? 'register' : 'login');
-                    setAuthError('');
-                  }}
-                  className="text-indigo-600 font-semibold hover:underline"
-                >
-                  {loginMode === 'login' ? 'Cadastre-se' : 'Faça login'}
-                </button>
-              </p>
+                <p class="text-center text-sm text-slate-500">
+                    <span id="toggle-text-prefix">Ainda não tem conta? </span>
+                    <button id="btn-toggle-mode" class="text-indigo-600 font-semibold hover:underline">Cadastre-se</button>
+                </p>
             </div>
-          </div>
         </div>
-      )}
     </div>
-  );
-}
+
+    <!-- Application Logic and Firebase -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+
+        // Firebase Config
+        const firebaseConfig = {
+            apiKey: "AIzaSyBA_qqcT9NC9wCMFDPR34WMt6NYIMGB35w",
+            authDomain: "recarga-eff36.firebaseapp.com",
+            projectId: "recarga-eff36",
+            storageBucket: "recarga-eff36.firebasestorage.app",
+            messagingSenderId: "209300037391",
+            appId: "1:209300037391:web:8420372be4d3ba6e28687a"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const googleProvider = new GoogleAuthProvider();
+
+        // Data
+        const OPERATORS = [
+            { id: 'vivo', name: 'Vivo', color: 'bg-purple-600' },
+            { id: 'claro', name: 'Claro', color: 'bg-red-600' },
+            { id: 'tim', name: 'TIM', color: 'bg-blue-600' },
+            { id: 'correios', name: 'Correios', color: 'bg-yellow-500' }
+        ];
+
+        const AMOUNTS = [
+            { id: 1, value: 15, pay: 12, discount: '20% OFF' },
+            { id: 2, value: 20, pay: 15, discount: '25% OFF' },
+            { id: 3, value: 30, pay: 20, discount: '33% OFF', popular: true },
+            { id: 4, value: 40, pay: 30, discount: '25% OFF' },
+            { id: 5, value: 50, pay: 35, discount: '30% OFF' },
+        ];
+
+        // State
+        let state = {
+            step: 'input',
+            phone: '',
+            operator: null,
+            amount: null,
+            loginMode: 'login' // login or register
+        };
+
+        // DOM Elements
+        const DOM = {
+            phoneInput: document.getElementById('phone-input'),
+            operatorsGrid: document.getElementById('operators-grid'),
+            amountsGrid: document.getElementById('amounts-grid'),
+            btnContinue: document.getElementById('btn-continue'),
+            btnBack: document.getElementById('btn-back'),
+            btnPay: document.getElementById('btn-pay'),
+            btnNew: document.getElementById('btn-new'),
+            logoBtn: document.getElementById('logo-btn'),
+            
+            steps: {
+                input: document.getElementById('step-input'),
+                checkout: document.getElementById('step-checkout'),
+                success: document.getElementById('step-success')
+            },
+            
+            checkout: {
+                phone: document.getElementById('checkout-phone'),
+                operator: document.getElementById('checkout-operator'),
+                original: document.getElementById('checkout-original'),
+                discount: document.getElementById('checkout-discount'),
+                total: document.getElementById('checkout-total')
+            },
+
+            success: {
+                amount: document.getElementById('success-amount'),
+                phone: document.getElementById('success-phone')
+            },
+            
+            loadingOverlay: document.getElementById('loading-overlay'),
+            
+            // Auth elements
+            auth: {
+                btnOpen: document.getElementById('btn-open-login'),
+                btnLogout: document.getElementById('btn-logout'),
+                userLoggedIn: document.getElementById('user-logged-in'),
+                userName: document.getElementById('user-name-display'),
+                modal: document.getElementById('login-modal'),
+                btnClose: document.getElementById('btn-close-modal'),
+                form: document.getElementById('auth-form'),
+                email: document.getElementById('auth-email'),
+                password: document.getElementById('auth-password'),
+                btnSubmit: document.getElementById('btn-submit-auth'),
+                btnSubmitText: document.getElementById('btn-submit-text'),
+                loading: document.getElementById('auth-loading'),
+                error: document.getElementById('auth-error'),
+                btnGoogle: document.getElementById('btn-google-auth'),
+                btnToggle: document.getElementById('btn-toggle-mode'),
+                title: document.getElementById('modal-title'),
+                subtitle: document.getElementById('modal-subtitle'),
+                togglePrefix: document.getElementById('toggle-text-prefix')
+            }
+        };
+
+        // Initialize Icons
+        lucide.createIcons();
+
+        // Render Functions
+        function renderOperators() {
+            DOM.operatorsGrid.innerHTML = OPERATORS.map(op => {
+                const isSelected = state.operator?.id === op.id;
+                const classes = isSelected 
+                    ? `${op.color} text-white shadow-md transform scale-105` 
+                    : `bg-slate-50 text-slate-500 border border-slate-200 hover:bg-slate-100`;
+                
+                return `<button data-id="${op.id}" class="operator-btn py-3 rounded-xl font-bold text-sm transition-all flex items-center justify-center ${classes}">${op.name}</button>`;
+            }).join('');
+
+            document.querySelectorAll('.operator-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    state.operator = OPERATORS.find(o => o.id === e.target.dataset.id);
+                    renderOperators();
+                    checkFormValidity();
+                });
+            });
+        }
+
+        function renderAmounts() {
+            DOM.amountsGrid.innerHTML = AMOUNTS.map(amt => {
+                const isSelected = state.amount?.id === amt.id;
+                const borderClass = isSelected ? 'border-indigo-600 bg-indigo-50/50' : 'border-slate-100 bg-white hover:border-indigo-200';
+                const popularClass = amt.popular && !isSelected ? 'border-amber-200 bg-amber-50/30' : '';
+                
+                const badge = amt.popular ? `<span class="absolute -top-3 left-1/2 -translate-x-1/2 bg-amber-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full whitespace-nowrap shadow-sm">MAIS ESCOLHIDO</span>` : '';
+                const discountIcon = `<i data-lucide="tag" class="w-3 h-3"></i>`;
+
+                return `
+                    <button data-id="${amt.id}" class="amount-btn relative p-3 rounded-xl border-2 text-left transition-all ${borderClass} ${popularClass}">
+                        ${badge}
+                        <div class="text-slate-500 line-through text-xs pointer-events-none">R$ ${amt.value.toFixed(2)}</div>
+                        <div class="font-bold text-lg text-slate-800 pointer-events-none">R$ ${amt.pay.toFixed(2)}</div>
+                        <div class="mt-1 text-xs font-bold text-emerald-600 flex items-center gap-1 pointer-events-none">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2H2v10l9.29 9.29c.94.94 2.48.94 3.42 0l6.58-6.58c.94-.94.94-2.48 0-3.42L12 2Z"/><path d="M7 7h.01"/></svg>
+                            ${amt.discount}
+                        </div>
+                    </button>
+                `;
+            }).join('');
+
+            document.querySelectorAll('.amount-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    state.amount = AMOUNTS.find(a => a.id === parseInt(e.currentTarget.dataset.id));
+                    renderAmounts();
+                    checkFormValidity();
+                });
+            });
+        }
+
+        function setStep(newStep) {
+            state.step = newStep;
+            
+            // Hide all
+            Object.values(DOM.steps).forEach(el => el.classList.add('hidden'));
+            
+            // Show new step
+            DOM.steps[newStep].classList.remove('hidden');
+
+            if (newStep === 'checkout') {
+                DOM.checkout.phone.textContent = state.phone;
+                DOM.checkout.operator.textContent = state.operator.name;
+                DOM.checkout.operator.className = `font-bold px-2 py-0.5 rounded text-xs text-white ${state.operator.color}`;
+                DOM.checkout.original.textContent = `R$ ${state.amount.value.toFixed(2)}`;
+                DOM.checkout.discount.textContent = `- R$ ${(state.amount.value - state.amount.pay).toFixed(2)}`;
+                DOM.checkout.total.textContent = `R$ ${state.amount.pay.toFixed(2)}`;
+            }
+
+            if (newStep === 'success') {
+                DOM.success.amount.textContent = `R$ ${state.amount.value.toFixed(2)}`;
+                DOM.success.phone.textContent = state.phone;
+            }
+        }
+
+        // Logic Functions
+        function handlePhoneChange(e) {
+            let val = e.target.value.replace(/\D/g, '');
+            if (val.length > 11) val = val.slice(0, 11);
+            
+            if (val.length > 2) val = `(${val.slice(0, 2)}) ${val.slice(2)}`;
+            if (val.length > 10) val = `${val.slice(0, 10)}-${val.slice(10)}`;
+            
+            state.phone = val;
+            e.target.value = val;
+            checkFormValidity();
+        }
+
+        function checkFormValidity() {
+            const isValid = state.phone.length >= 14 && state.operator && state.amount;
+            if (isValid) {
+                DOM.btnContinue.disabled = false;
+                DOM.btnContinue.className = "w-full py-4 rounded-xl font-bold text-lg flex items-center justify-center gap-2 transition-all mt-auto bg-indigo-600 text-white hover:bg-indigo-700 shadow-lg shadow-indigo-200 cursor-pointer hover:-translate-y-0.5";
+            } else {
+                DOM.btnContinue.disabled = true;
+                DOM.btnContinue.className = "w-full py-4 rounded-xl font-bold text-lg flex items-center justify-center gap-2 transition-all mt-auto bg-slate-100 text-slate-400 cursor-not-allowed";
+            }
+        }
+
+        function showLoading(duration, callback) {
+            DOM.loadingOverlay.classList.remove('hidden');
+            setTimeout(() => {
+                DOM.loadingOverlay.classList.add('hidden');
+                callback();
+            }, duration);
+        }
+
+        // Event Listeners for Recarga Flow
+        DOM.phoneInput.addEventListener('input', handlePhoneChange);
+        
+        DOM.btnContinue.addEventListener('click', () => {
+            if (state.phone.length >= 14 && state.operator && state.amount) {
+                showLoading(600, () => setStep('checkout'));
+            }
+        });
+
+        DOM.btnBack.addEventListener('click', () => setStep('input'));
+
+        DOM.btnPay.addEventListener('click', () => {
+            showLoading(1500, () => setStep('success'));
+        });
+
+        DOM.btnNew.addEventListener('click', () => {
+            state.phone = '';
+            state.operator = null;
+            state.amount = null;
+            DOM.phoneInput.value = '';
+            renderOperators();
+            renderAmounts();
+            checkFormValidity();
+            setStep('input');
+        });
+
+        DOM.logoBtn.addEventListener('click', () => {
+            if(state.step !== 'success') setStep('input');
+        });
+
+        // --- AUTHENTICATION LOGIC ---
+
+        function toggleLoginModal(show) {
+            if (show) {
+                DOM.auth.modal.classList.remove('hidden');
+            } else {
+                DOM.auth.modal.classList.add('hidden');
+                DOM.auth.error.classList.add('hidden');
+            }
+        }
+
+        function updateAuthModeUI() {
+            if (state.loginMode === 'login') {
+                DOM.auth.title.textContent = 'Acesse sua conta';
+                DOM.auth.subtitle.textContent = 'Faça login para salvar seus recibos.';
+                DOM.auth.btnSubmitText.textContent = 'Entrar';
+                DOM.auth.togglePrefix.textContent = 'Ainda não tem conta? ';
+                DOM.auth.btnToggle.textContent = 'Cadastre-se';
+            } else {
+                DOM.auth.title.textContent = 'Crie sua conta';
+                DOM.auth.subtitle.textContent = 'Cadastre-se para recargas mais rápidas.';
+                DOM.auth.btnSubmitText.textContent = 'Cadastrar';
+                DOM.auth.togglePrefix.textContent = 'Já tem uma conta? ';
+                DOM.auth.btnToggle.textContent = 'Faça login';
+            }
+            DOM.auth.error.classList.add('hidden');
+        }
+
+        function setAuthLoading(isLoading) {
+            DOM.auth.btnSubmit.disabled = isLoading;
+            DOM.auth.btnGoogle.disabled = isLoading;
+            if (isLoading) {
+                DOM.auth.loading.classList.remove('hidden');
+            } else {
+                DOM.auth.loading.classList.add('hidden');
+            }
+        }
+
+        // Firebase Auth Listeners
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                DOM.auth.btnOpen.classList.add('hidden');
+                DOM.auth.userLoggedIn.classList.remove('hidden');
+                DOM.auth.userName.textContent = user.displayName || user.email.split('@')[0];
+                DOM.auth.userName.title = user.email;
+            } else {
+                DOM.auth.btnOpen.classList.remove('hidden');
+                DOM.auth.userLoggedIn.classList.add('hidden');
+            }
+        });
+
+        // DOM Auth Listeners
+        DOM.auth.btnOpen.addEventListener('click', () => toggleLoginModal(true));
+        DOM.auth.btnClose.addEventListener('click', () => toggleLoginModal(false));
+        
+        DOM.auth.btnToggle.addEventListener('click', () => {
+            state.loginMode = state.loginMode === 'login' ? 'register' : 'login';
+            updateAuthModeUI();
+        });
+
+        DOM.auth.form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            setAuthLoading(true);
+            DOM.auth.error.classList.add('hidden');
+            
+            const email = DOM.auth.email.value;
+            const password = DOM.auth.password.value;
+
+            try {
+                if (state.loginMode === 'login') {
+                    await signInWithEmailAndPassword(auth, email, password);
+                } else {
+                    await createUserWithEmailAndPassword(auth, email, password);
+                }
+                toggleLoginModal(false);
+            } catch (error) {
+                DOM.auth.error.textContent = error.message.replace('Firebase: ', '');
+                DOM.auth.error.classList.remove('hidden');
+            } finally {
+                setAuthLoading(false);
+            }
+        });
+
+        DOM.auth.btnGoogle.addEventListener('click', async () => {
+            setAuthLoading(true);
+            DOM.auth.error.classList.add('hidden');
+            try {
+                await signInWithPopup(auth, googleProvider);
+                toggleLoginModal(false);
+            } catch (error) {
+                DOM.auth.error.textContent = error.message.replace('Firebase: ', '');
+                DOM.auth.error.classList.remove('hidden');
+            } finally {
+                setAuthLoading(false);
+            }
+        });
+
+        DOM.auth.btnLogout.addEventListener('click', async () => {
+            await signOut(auth);
+        });
+
+        // Init
+        renderOperators();
+        renderAmounts();
+    </script>
+</body>
+</html>
