@@ -2,18 +2,21 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>RecargaFast - Recarga com Desconto</title>
     
+    <!-- PWA Meta Tags -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#4f46e5">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="RecargaFast">
-    <link rel="apple-touch-icon" href="icon-192.png">
+    <link rel="apple-touch-icon" href="https://placehold.co/192x192/4f46e5/white?text=RF">
 
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
+    <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
 
     <style>
@@ -21,9 +24,10 @@
 
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
+            -webkit-tap-highlight-color: transparent;
         }
 
-        /* Custom animations */
+        /* Animations */
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes slideUp { from { opacity: 0; transform: translateY(1.5rem); } to { opacity: 1; transform: translateY(0); } }
         @keyframes slideRight { from { opacity: 0; transform: translateX(2rem); } to { opacity: 1; transform: translateX(0); } }
@@ -36,39 +40,47 @@
         
         .hidden { display: none !important; }
 
-        /* Custom scrollbar */
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: #cbd5e1; }
-
         .glass-card {
-            background: rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
         }
 
         .bg-blob {
             position: fixed;
-            width: 500px;
-            height: 500px;
+            width: 600px;
+            height: 600px;
             border-radius: 50%;
-            filter: blur(80px);
+            filter: blur(100px);
             z-index: -1;
-            opacity: 0.15;
+            opacity: 0.12;
             pointer-events: none;
+        }
+
+        .operator-card.active {
+            border-color: #4f46e5;
+            background-color: #f5f3ff;
+            transform: scale(1.05);
+        }
+
+        .amount-card.active {
+            border-color: #4f46e5;
+            background-color: #4f46e5;
+            color: white;
         }
     </style>
 </head>
-<body class="min-h-screen bg-slate-50 text-slate-900 selection:bg-indigo-100 overflow-x-hidden">
+<body class="min-h-screen bg-slate-50 text-slate-900 overflow-x-hidden">
 
-    <div class="bg-blob bg-indigo-400 -top-20 -left-20"></div>
-    <div class="bg-blob bg-violet-400 -bottom-20 -right-20"></div>
+    <!-- Elementos Decorativos -->
+    <div class="bg-blob bg-indigo-500 -top-20 -left-20"></div>
+    <div class="bg-blob bg-violet-500 -bottom-20 -right-20"></div>
 
-    <nav class="bg-white/70 backdrop-blur-md border-b border-slate-200/50 sticky top-0 z-50">
+    <!-- Navbar -->
+    <nav class="bg-white/80 backdrop-blur-lg border-b border-slate-200/50 sticky top-0 z-50">
         <div class="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
-            <div class="flex items-center gap-2 cursor-pointer transition-transform hover:scale-105 active:scale-95" id="logo-btn">
-                <div class="bg-gradient-to-br from-indigo-600 to-violet-600 p-2 rounded-xl shadow-lg shadow-indigo-200">
+            <div class="flex items-center gap-2 cursor-pointer transition-transform active:scale-95" id="logo-btn">
+                <div class="bg-gradient-to-br from-indigo-600 to-violet-600 p-2 rounded-xl shadow-lg">
                     <i data-lucide="zap" class="w-5 h-5 text-white fill-white"></i>
                 </div>
                 <span class="text-xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-violet-700">
@@ -76,7 +88,7 @@
                 </span>
             </div>
             
-            <div class="flex items-center gap-2">
+            <div class="flex items-center gap-3">
                 <div id="user-logged-in" class="hidden flex items-center gap-2">
                     <button id="btn-history" class="hidden md:flex items-center gap-2 text-slate-600 hover:bg-slate-100 py-2 px-4 rounded-xl transition-all text-sm font-semibold">
                         <i data-lucide="history" class="w-4 h-4"></i>
@@ -85,8 +97,7 @@
                     <button id="btn-history-mobile" class="md:hidden p-2 text-slate-600 hover:bg-slate-100 rounded-xl">
                         <i data-lucide="history" class="w-5 h-5"></i>
                     </button>
-                    
-                    <div class="flex items-center gap-2 bg-indigo-50/50 py-1.5 px-3 rounded-full border border-indigo-100">
+                    <div class="flex items-center gap-2 bg-indigo-50 py-1.5 px-3 rounded-full border border-indigo-100">
                         <span id="user-name-display" class="text-indigo-700 font-bold text-sm truncate max-w-[80px]"></span>
                         <button id="btn-logout" class="text-indigo-400 hover:text-red-500 transition-colors">
                             <i data-lucide="log-out" class="w-4 h-4"></i>
@@ -96,7 +107,7 @@
 
                 <a href="admin.html" id="btn-admin-panel" class="hidden flex items-center gap-2 bg-slate-900 text-white hover:bg-slate-800 py-2 px-4 rounded-xl transition-all text-xs font-bold uppercase tracking-wider">
                     <i data-lucide="settings" class="w-3.5 h-3.5"></i>
-                    <span class="hidden sm:inline">Painel Admin</span>
+                    <span class="hidden sm:inline">Admin</span>
                 </a>
                 
                 <button id="btn-open-login" class="flex items-center gap-2 bg-indigo-600 text-white hover:bg-indigo-700 py-2 px-5 rounded-xl transition-all shadow-md shadow-indigo-200 font-bold text-sm active:scale-95">
@@ -107,123 +118,196 @@
         </div>
     </nav>
 
-    <div id="view-app" class="animate-fade-in">
-        <main class="max-w-5xl mx-auto px-4 py-8 md:py-16 flex flex-col lg:flex-row gap-12 lg:items-center">
-            
-            <div class="w-full lg:w-1/2 flex flex-col space-y-8 animate-slide-up">
-                <div class="space-y-4">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-100 text-indigo-700 w-fit text-xs font-bold uppercase tracking-wide">
-                        <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
-                        Oferta Exclusiva PIX
-                    </div>
-                    <h1 class="text-4xl md:text-6xl font-extrabold leading-[1.1] text-slate-900 tracking-tight">
-                        Recarga rápida com <br>
-                        <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-violet-500">desconto real.</span>
-                    </h1>
-                    <p class="text-lg md:text-xl text-slate-500 max-w-lg leading-relaxed font-medium">
-                        Economize até 33% em cada recarga. Saldo liberado na hora diretamente no seu celular.
-                    </p>
+    <!-- Main Content -->
+    <main class="max-w-5xl mx-auto px-4 py-8 md:py-16 flex flex-col lg:flex-row gap-12 lg:items-center">
+        
+        <!-- Marketing -->
+        <div class="w-full lg:w-1/2 flex flex-col space-y-8 animate-slide-up">
+            <div class="space-y-4">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-100 text-indigo-700 w-fit text-xs font-bold uppercase tracking-wide">
+                    <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+                    Oferta Exclusiva PIX
                 </div>
-                
-                <div class="flex flex-col sm:flex-row gap-4 pt-4">
-                    <div class="flex items-center gap-3 bg-white p-4 rounded-2xl shadow-sm border border-slate-200/60 flex-1">
-                        <div class="bg-amber-100 p-2 rounded-lg">
-                            <i data-lucide="zap" class="w-5 h-5 text-amber-600"></i>
-                        </div>
-                        <div>
-                            <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Velocidade</p>
-                            <p class="text-sm font-bold text-slate-700">Cai em segundos</p>
-                        </div>
+                <h1 class="text-4xl md:text-6xl font-extrabold leading-[1.1] text-slate-900 tracking-tight">
+                    Recarga rápida com <br>
+                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-violet-500">desconto real.</span>
+                </h1>
+                <p class="text-lg md:text-xl text-slate-500 max-w-lg leading-relaxed font-medium">
+                    Economize até 33% em cada recarga. Saldo liberado na hora diretamente no seu celular.
+                </p>
+            </div>
+            
+            <div class="flex flex-col sm:row gap-4 pt-4">
+                <div class="flex items-center gap-3 bg-white p-4 rounded-2xl shadow-sm border border-slate-200/60 flex-1">
+                    <div class="bg-amber-100 p-2 rounded-lg">
+                        <i data-lucide="zap" class="w-5 h-5 text-amber-600"></i>
                     </div>
-                    <div class="flex items-center gap-3 bg-white p-4 rounded-2xl shadow-sm border border-slate-200/60 flex-1">
-                        <div class="bg-emerald-100 p-2 rounded-lg">
-                            <i data-lucide="shield-check" class="w-5 h-5 text-emerald-600"></i>
-                        </div>
-                        <div>
-                            <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Segurança</p>
-                            <p class="text-sm font-bold text-slate-700">100% Protegido</p>
-                        </div>
+                    <div>
+                        <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Velocidade</p>
+                        <p class="text-sm font-bold text-slate-700">Cai em segundos</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3 bg-white p-4 rounded-2xl shadow-sm border border-slate-200/60 flex-1">
+                    <div class="bg-emerald-100 p-2 rounded-lg">
+                        <i data-lucide="shield-check" class="w-5 h-5 text-emerald-600"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Segurança</p>
+                        <p class="text-sm font-bold text-slate-700">100% Protegido</p>
                     </div>
                 </div>
             </div>
+        </div>
 
-            <div class="w-full lg:w-1/2 max-w-xl mx-auto">
-                <div class="glass-card rounded-[32px] shadow-2xl shadow-indigo-200/40 border border-white overflow-hidden relative min-h-[580px] flex flex-col animate-zoom-in">
-                    
-                    <div id="loading-overlay" class="hidden absolute inset-0 bg-white/60 backdrop-blur-md z-20 flex items-center justify-center">
-                        <div class="w-14 h-14 border-4 border-indigo-100 border-t-indigo-600 rounded-full animate-spin"></div>
+        <!-- App Widget -->
+        <div class="w-full lg:w-1/2 max-w-xl mx-auto">
+            <div class="glass-card rounded-[32px] shadow-2xl shadow-indigo-200/40 border border-white overflow-hidden relative min-h-[600px] flex flex-col animate-zoom-in">
+                
+                <div id="loading-overlay" class="hidden absolute inset-0 bg-white/60 backdrop-blur-md z-20 flex items-center justify-center">
+                    <div class="w-14 h-14 border-4 border-indigo-100 border-t-indigo-600 rounded-full animate-spin"></div>
+                </div>
+
+                <!-- Step 1: Input -->
+                <div id="step-input" class="p-8 md:p-10 flex flex-col h-full">
+                    <div class="flex items-center justify-between mb-8">
+                        <h2 class="text-2xl font-extrabold text-slate-800">Nova Recarga</h2>
+                        <i data-lucide="smartphone" class="w-6 h-6 text-slate-400"></i>
                     </div>
 
-                    <div id="step-input" class="p-8 md:p-10 flex flex-col h-full animate-slide-up">
-                        <div class="flex items-center justify-between mb-8">
-                            <h2 class="text-2xl font-extrabold text-slate-800 tracking-tight">Nova Recarga</h2>
-                            <i data-lucide="smartphone" class="w-6 h-6 text-slate-400"></i>
-                        </div>
-
-                        <div class="space-y-6 flex-1">
-                            <div class="space-y-2">
-                                <label class="text-sm font-bold text-slate-500 ml-1">Número do Celular</label>
-                                <div class="relative">
-                                    <input type="tel" id="phone-input" placeholder="(00) 00000-0000" class="w-full px-5 py-4 bg-white border-2 border-slate-100 rounded-2xl text-xl focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-bold placeholder:font-medium placeholder:text-slate-300" />
-                                    <div class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-300" id="phone-valid-icon">
-                                        <i data-lucide="circle-check" class="w-6 h-6"></i>
-                                    </div>
+                    <div class="space-y-6 flex-1">
+                        <div class="space-y-2">
+                            <label class="text-sm font-bold text-slate-500 ml-1">Número do Celular</label>
+                            <div class="relative">
+                                <input type="tel" id="phone-input" placeholder="(00) 00000-0000" class="w-full px-5 py-4 bg-white border-2 border-slate-100 rounded-2xl text-xl focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-bold" />
+                                <div class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-300" id="phone-valid-icon">
+                                    <i data-lucide="circle-check" class="w-6 h-6"></i>
                                 </div>
                             </div>
-
-                            <div class="space-y-3">
-                                <label class="text-sm font-bold text-slate-500 ml-1">Selecione a Operadora</label>
-                                <div id="operators-grid" class="grid grid-cols-4 gap-3"></div>
-                            </div>
-
-                            <div class="space-y-3">
-                                <label class="text-sm font-bold text-slate-500 ml-1">Valor da Recarga</label>
-                                <div id="amounts-grid" class="grid grid-cols-2 gap-4"></div>
-                            </div>
                         </div>
 
-                        <button id="btn-continue" disabled class="w-full py-5 rounded-2xl font-extrabold text-lg flex items-center justify-center gap-3 transition-all mt-8 bg-slate-100 text-slate-400 cursor-not-allowed group">
-                            Continuar para o pagamento
-                            <i data-lucide="chevron-right" class="w-5 h-5 transition-transform group-hover:translate-x-1"></i>
+                        <div class="space-y-3">
+                            <label class="text-sm font-bold text-slate-500 ml-1">Operadora</label>
+                            <div id="operators-grid" class="grid grid-cols-4 gap-3"></div>
+                        </div>
+
+                        <div class="space-y-3">
+                            <label class="text-sm font-bold text-slate-500 ml-1">Valor</label>
+                            <div id="amounts-grid" class="grid grid-cols-2 gap-4"></div>
+                        </div>
+                    </div>
+
+                    <button id="btn-continue" disabled class="w-full py-5 rounded-2xl font-extrabold text-lg flex items-center justify-center gap-3 transition-all mt-8 bg-slate-100 text-slate-400 cursor-not-allowed">
+                        Continuar para pagamento
+                        <i data-lucide="chevron-right" class="w-5 h-5"></i>
+                    </button>
+                </div>
+
+                <!-- Step 2: Checkout -->
+                <div id="step-checkout" class="hidden p-8 md:p-10 flex flex-col h-full animate-slide-right">
+                    <button id="btn-back" class="w-fit p-2 -ml-2 mb-6 text-slate-400 hover:text-slate-900 rounded-xl">
+                        <i data-lucide="arrow-left" class="w-5 h-5"></i>
+                    </button>
+                    <h2 class="text-2xl font-extrabold mb-8 text-slate-800">Confirmar Pedido</h2>
+                    <div class="bg-white/50 border border-slate-100 rounded-3xl p-6 space-y-5 mb-8">
+                        <div class="flex justify-between items-center">
+                            <span class="text-slate-400 font-bold text-sm">Número</span>
+                            <span id="checkout-phone" class="font-extrabold text-slate-800 text-lg"></span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-slate-400 font-bold text-sm">Operadora</span>
+                            <span id="checkout-operator" class="font-bold px-3 py-1 rounded-lg text-xs text-white"></span>
+                        </div>
+                        <div class="h-px w-full bg-slate-100"></div>
+                        <div class="flex justify-between items-end">
+                            <span class="text-slate-800 font-bold">Total Final</span>
+                            <span id="checkout-total" class="text-4xl font-black text-indigo-600"></span>
+                        </div>
+                    </div>
+                    <button id="btn-pay" class="w-full py-5 rounded-2xl font-extrabold text-lg bg-indigo-600 text-white hover:bg-indigo-700 shadow-xl shadow-indigo-200">
+                        Gerar QR Code PIX
+                    </button>
+                </div>
+
+                <!-- Step 3: Success / PIX -->
+                <div id="step-success" class="hidden p-8 md:p-10 flex flex-col items-center h-full text-center">
+                    <div id="status-icon-container" class="w-20 h-20 bg-amber-100 rounded-3xl flex items-center justify-center mb-6">
+                        <i data-lucide="loader-2" class="w-10 h-10 text-amber-500 animate-spin"></i>
+                    </div>
+                    <h2 id="status-title" class="text-3xl font-black mb-2 text-slate-800">Aguardando...</h2>
+                    <p class="text-slate-400 font-medium mb-8">Efetue o pagamento abaixo para liberar seu saldo.</p>
+
+                    <div id="pix-container" class="w-full bg-white border border-slate-100 p-6 rounded-[24px] shadow-inner mb-8 space-y-4">
+                        <div class="flex justify-center">
+                            <img id="pix-qr-code" src="" class="w-44 h-44 rounded-lg hidden" />
+                            <div id="pix-loading-placeholder" class="w-44 h-44 flex items-center justify-center">
+                                <div class="w-8 h-8 border-3 border-indigo-600 rounded-full animate-spin"></div>
+                            </div>
+                        </div>
+                        <div id="pix-code-text" class="bg-slate-50 p-3 rounded-xl text-xs font-mono truncate text-slate-400">Gerando código...</div>
+                        <button id="btn-copy-pix" class="w-full py-3 text-sm font-bold text-indigo-600 bg-indigo-50 rounded-xl hover:bg-indigo-100 active:scale-95 transition-all">
+                            Copiar Código PIX
                         </button>
                     </div>
 
-                    <div id="step-checkout" class="hidden p-8 md:p-10 flex flex-col h-full animate-slide-right">
-                        <button id="btn-back" class="w-fit p-2 -ml-2 mb-6 text-slate-400 hover:text-slate-900 hover:bg-slate-100 rounded-xl transition-all">
-                            <i data-lucide="arrow-left" class="w-5 h-5"></i>
-                        </button>
-                        <h2 class="text-2xl font-extrabold mb-8 text-slate-800">Confirmar Pedido</h2>
-                        <div class="bg-white/50 border border-slate-100 rounded-3xl p-6 space-y-5 mb-8">
-                            <div class="flex justify-between items-center"><span class="text-slate-400 font-bold text-sm">Número</span><span id="checkout-phone" class="font-extrabold text-slate-800 text-lg"></span></div>
-                            <div class="flex justify-between items-center"><span class="text-slate-400 font-bold text-sm">Operadora</span><span id="checkout-operator" class="font-bold px-3 py-1 rounded-lg text-xs text-white"></span></div>
-                            <div class="h-px w-full bg-slate-100"></div>
-                            <div class="flex justify-between items-end"><span class="text-slate-800 font-bold">Total Final</span><span id="checkout-total" class="text-4xl font-black text-indigo-600"></span></div>
-                        </div>
-                        <button id="btn-pay" class="w-full py-5 rounded-2xl font-extrabold text-lg bg-indigo-600 text-white hover:bg-indigo-700 shadow-xl">Gerar QR Code PIX</button>
-                    </div>
-
-                    <div id="step-success" class="hidden p-8 md:p-10 flex flex-col items-center h-full text-center animate-zoom-in">
-                         <div id="status-icon-container" class="w-20 h-20 bg-amber-100 rounded-3xl flex items-center justify-center mb-6"><i data-lucide="loader-2" class="w-10 h-10 text-amber-500 animate-spin"></i></div>
-                         <h2 id="status-title" class="text-3xl font-black mb-2 text-slate-800">Aguardando...</h2>
-                         <div id="pix-container" class="w-full bg-white border border-slate-100 p-6 rounded-[24px] shadow-inner mb-8 space-y-4">
-                            <div class="flex justify-center"><img id="pix-qr-code" src="" class="w-44 h-44 rounded-lg hidden" /><div id="pix-loading-placeholder" class="w-44 h-44 flex items-center justify-center"><div class="w-8 h-8 border-3 border-indigo-600 rounded-full animate-spin"></div></div></div>
-                            <div id="pix-code-text" class="bg-slate-50 p-3 rounded-xl text-xs font-mono truncate">Aguardando...</div>
-                            <button id="btn-copy-pix" class="w-full py-3 text-sm font-bold text-indigo-600 bg-indigo-50 rounded-xl">Copiar Código PIX</button>
-                         </div>
-                         <button id="btn-new" class="w-full py-4 font-bold text-slate-400">Cancelar e voltar</button>
-                    </div>
+                    <button id="btn-new" class="w-full py-4 font-bold text-slate-400 hover:text-slate-600">
+                        Cancelar e voltar
+                    </button>
                 </div>
             </div>
-        </main>
+        </div>
+    </main>
+
+    <!-- Auth Modal -->
+    <div id="modal-auth" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" id="modal-auth-overlay"></div>
+        <div class="bg-white rounded-[32px] w-full max-w-md relative z-10 overflow-hidden shadow-2xl animate-zoom-in">
+            <div class="p-8">
+                <div class="flex justify-between items-center mb-8">
+                    <h3 id="auth-title" class="text-2xl font-black text-slate-800">Bem-vindo</h3>
+                    <button id="btn-close-auth" class="text-slate-400 hover:text-slate-900"><i data-lucide="x" class="w-6 h-6"></i></button>
+                </div>
+                
+                <form id="auth-form" class="space-y-4">
+                    <div class="space-y-2">
+                        <label class="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">Email</label>
+                        <input type="email" id="auth-email" required class="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all font-semibold" />
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">Senha</label>
+                        <input type="password" id="auth-password" required class="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all font-semibold" />
+                    </div>
+                    <div id="auth-error" class="hidden text-red-500 text-xs font-bold bg-red-50 p-3 rounded-xl"></div>
+                    
+                    <button type="submit" class="w-full py-5 bg-indigo-600 text-white rounded-2xl font-extrabold text-lg flex items-center justify-center gap-3">
+                        <span id="btn-submit-text">Entrar</span>
+                        <div id="auth-loading" class="hidden w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                    </button>
+                </form>
+
+                <div class="relative my-8">
+                    <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-slate-100"></div></div>
+                    <div class="relative flex justify-center text-xs font-bold uppercase tracking-widest"><span class="bg-white px-4 text-slate-300">ou continue com</span></div>
+                </div>
+
+                <button id="btn-google" class="w-full py-4 border-2 border-slate-100 rounded-2xl font-bold flex items-center justify-center gap-3 hover:bg-slate-50 transition-all">
+                    <svg class="w-5 h-5" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.66l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+                    Google
+                </button>
+
+                <p class="text-center mt-8 text-sm font-bold text-slate-400">
+                    Não tem conta? <button id="btn-switch-auth" class="text-indigo-600 hover:underline">Cadastre-se</button>
+                </p>
+            </div>
+        </div>
     </div>
 
+    <!-- Firebase Scripts -->
     <script type="module">
-        // Importações do Firebase e Lógica do App mantidas...
-        // [CÓDIGO ORIGINAL DO SCRIPT MANTIDO]
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
         import { getFirestore, doc, onSnapshot, getDoc, setDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
+        // CONFIGURAÇÃO FIREBASE (Substitua se necessário)
         const firebaseConfig = {
             apiKey: "AIzaSyBA_qqcT9NC9wCMFDPR34WMt6NYIMGB35w",
             authDomain: "recarga-eff36.firebaseapp.com",
@@ -236,18 +320,251 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        
-        // ... (resto do seu código original aqui)
+        const googleProvider = new GoogleAuthProvider();
+
+        // State
+        const state = {
+            user: null,
+            config: null,
+            order: { phone: '', operator: '', amount: null, price: null },
+            loginMode: 'login'
+        };
+
+        // DOM Elements
+        const DOM = {
+            steps: {
+                input: document.getElementById('step-input'),
+                checkout: document.getElementById('step-checkout'),
+                success: document.getElementById('step-success')
+            },
+            phone: document.getElementById('phone-input'),
+            operators: document.getElementById('operators-grid'),
+            amounts: document.getElementById('amounts-grid'),
+            btnContinue: document.getElementById('btn-continue'),
+            loading: document.getElementById('loading-overlay'),
+            auth: {
+                modal: document.getElementById('modal-auth'),
+                form: document.getElementById('auth-form'),
+                email: document.getElementById('auth-email'),
+                password: document.getElementById('auth-password'),
+                btnSubmitText: document.getElementById('btn-submit-text'),
+                title: document.getElementById('auth-title'),
+                error: document.getElementById('auth-error'),
+                loadingSpinner: document.getElementById('auth-loading'),
+                btnGoogle: document.getElementById('btn-google'),
+                btnLogout: document.getElementById('btn-logout'),
+                nameDisplay: document.getElementById('user-name-display'),
+                loggedUI: document.getElementById('user-logged-in'),
+                openBtn: document.getElementById('btn-open-login')
+            }
+        };
+
+        // Initialize Icons
+        lucide.createIcons();
+
+        // Load Config from Firestore
+        async function loadConfig() {
+            try {
+                const snap = await getDoc(doc(db, 'config', 'prices'));
+                if (snap.exists()) {
+                    state.config = snap.data();
+                    renderUI();
+                }
+            } catch (err) { console.error("Erro ao carregar preços:", err); }
+        }
+
+        function renderUI() {
+            if (!state.config) return;
+
+            // Render Operators
+            DOM.operators.innerHTML = state.config.operators.map(op => `
+                <button class="operator-card p-3 rounded-2xl border-2 border-slate-100 bg-white transition-all flex flex-col items-center gap-2 group hover:border-indigo-100" data-op="${op.name}">
+                    <div class="w-10 h-10 rounded-full flex items-center justify-center text-white font-black text-[10px]" style="background: ${op.color}">${op.name}</div>
+                    <span class="text-[10px] font-bold text-slate-400 group-hover:text-slate-600">${op.name}</span>
+                </button>
+            `).join('');
+
+            // Render Amounts
+            DOM.amounts.innerHTML = state.config.prices.map(p => `
+                <button class="amount-card p-4 rounded-2xl border-2 border-slate-100 bg-white transition-all flex flex-col items-start gap-1 group hover:border-indigo-100" data-val="${p.value}" data-price="${p.price}">
+                    <span class="text-xs font-bold text-slate-400 group-hover:text-indigo-400">Recarga de</span>
+                    <div class="flex items-baseline gap-1">
+                        <span class="text-lg font-black tracking-tight">R$ ${p.value}</span>
+                        <span class="text-[10px] font-bold text-emerald-500">Pague R$ ${p.price}</span>
+                    </div>
+                </button>
+            `).join('');
+
+            setupEvents();
+        }
+
+        function setupEvents() {
+            document.querySelectorAll('.operator-card').forEach(btn => {
+                btn.onclick = () => {
+                    document.querySelectorAll('.operator-card').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    state.order.operator = btn.dataset.op;
+                    validate();
+                };
+            });
+
+            document.querySelectorAll('.amount-card').forEach(btn => {
+                btn.onclick = () => {
+                    document.querySelectorAll('.amount-card').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    state.order.amount = btn.dataset.val;
+                    state.order.price = btn.dataset.price;
+                    validate();
+                };
+            });
+        }
+
+        DOM.phone.oninput = (e) => {
+            let v = e.target.value.replace(/\D/g, '');
+            if (v.length > 11) v = v.slice(0, 11);
+            if (v.length > 2) v = `(${v.slice(0, 2)}) ${v.slice(2)}`;
+            if (v.length > 9) v = `${v.slice(0, 9)}-${v.slice(9)}`;
+            e.target.value = v;
+            validate();
+        };
+
+        function validate() {
+            const isPhoneValid = DOM.phone.value.replace(/\D/g, '').length === 11;
+            const canContinue = isPhoneValid && state.order.operator && state.order.amount;
+            
+            DOM.btnContinue.disabled = !canContinue;
+            DOM.btnContinue.className = `w-full py-5 rounded-2xl font-extrabold text-lg flex items-center justify-center gap-3 transition-all mt-8 ${canContinue ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-100 hover:bg-indigo-700 active:scale-95' : 'bg-slate-100 text-slate-400 cursor-not-allowed'}`;
+        }
+
+        // Navigation & Logic
+        DOM.btnContinue.onclick = () => {
+            if (!state.user) {
+                DOM.auth.modal.classList.remove('hidden');
+                return;
+            }
+            state.order.phone = DOM.phone.value;
+            
+            document.getElementById('checkout-phone').textContent = state.order.phone;
+            document.getElementById('checkout-total').textContent = `R$ ${state.order.price}`;
+            const opData = state.config.operators.find(o => o.name === state.order.operator);
+            const opTag = document.getElementById('checkout-operator');
+            opTag.textContent = state.order.operator;
+            opTag.style.backgroundColor = opData.color;
+
+            DOM.steps.input.classList.add('hidden');
+            DOM.steps.checkout.classList.remove('hidden');
+        };
+
+        document.getElementById('btn-pay').onclick = async () => {
+            DOM.loading.classList.remove('hidden');
+            try {
+                const orderId = `REC-${Date.now()}`;
+                const orderData = {
+                    ...state.order,
+                    id: orderId,
+                    userId: state.user.uid,
+                    status: 'pending',
+                    createdAt: new Date().toISOString()
+                };
+
+                await setDoc(doc(db, 'orders', orderId), orderData);
+                
+                DOM.steps.checkout.classList.add('hidden');
+                DOM.steps.success.classList.remove('hidden');
+                startPixListener(orderId);
+
+            } catch (err) { console.error(err); }
+            finally { DOM.loading.classList.add('hidden'); }
+        };
+
+        function startPixListener(orderId) {
+            onSnapshot(doc(db, 'orders', orderId), (snap) => {
+                const data = snap.data();
+                if (data.pix_qr && data.pix_code) {
+                    const qrImg = document.getElementById('pix-qr-code');
+                    qrImg.src = data.pix_qr;
+                    qrImg.classList.remove('hidden');
+                    document.getElementById('pix-loading-placeholder').classList.add('hidden');
+                    document.getElementById('pix-code-text').textContent = data.pix_code;
+                    
+                    document.getElementById('btn-copy-pix').onclick = () => {
+                        navigator.clipboard.writeText(data.pix_code);
+                        const originalText = document.getElementById('btn-copy-pix').textContent;
+                        document.getElementById('btn-copy-pix').textContent = "Código Copiado!";
+                        setTimeout(() => document.getElementById('btn-copy-pix').textContent = originalText, 2000);
+                    };
+                }
+
+                if (data.status === 'completed') {
+                    document.getElementById('status-title').textContent = "Recarga Enviada!";
+                    document.getElementById('status-icon-container').className = "w-20 h-20 bg-emerald-100 rounded-3xl flex items-center justify-center mb-6";
+                    document.getElementById('status-icon-container').innerHTML = '<i data-lucide="check" class="w-10 h-10 text-emerald-600"></i>';
+                    lucide.createIcons();
+                }
+            });
+        }
+
+        // Auth Logic
+        onAuthStateChanged(auth, u => {
+            state.user = u;
+            if (u) {
+                DOM.auth.openBtn.classList.add('hidden');
+                DOM.auth.loggedUI.classList.remove('hidden');
+                DOM.auth.nameDisplay.textContent = u.displayName || u.email.split('@')[0];
+                if (u.email === 'admin@recargafast.com') document.getElementById('btn-admin-panel').classList.remove('hidden');
+            } else {
+                DOM.auth.openBtn.classList.remove('hidden');
+                DOM.auth.loggedUI.classList.add('hidden');
+                document.getElementById('btn-admin-panel').classList.add('hidden');
+            }
+        });
+
+        document.getElementById('btn-open-login').onclick = () => DOM.auth.modal.classList.remove('hidden');
+        document.getElementById('btn-close-auth').onclick = () => DOM.auth.modal.classList.add('hidden');
+        document.getElementById('modal-auth-overlay').onclick = () => DOM.auth.modal.classList.add('hidden');
+
+        document.getElementById('btn-switch-auth').onclick = () => {
+            state.loginMode = state.loginMode === 'login' ? 'register' : 'login';
+            DOM.auth.title.textContent = state.loginMode === 'login' ? 'Bem-vindo' : 'Criar Conta';
+            DOM.auth.btnSubmitText.textContent = state.loginMode === 'login' ? 'Entrar' : 'Cadastrar';
+        };
+
+        DOM.auth.form.onsubmit = async (e) => {
+            e.preventDefault();
+            DOM.auth.loadingSpinner.classList.remove('hidden');
+            DOM.auth.error.classList.add('hidden');
+            try {
+                if (state.loginMode === 'login') await signInWithEmailAndPassword(auth, DOM.auth.email.value, DOM.auth.password.value);
+                else await createUserWithEmailAndPassword(auth, DOM.auth.email.value, DOM.auth.password.value);
+                DOM.auth.modal.classList.add('hidden');
+            } catch (err) { 
+                DOM.auth.error.textContent = "Erro na autenticação. Verifique os dados.";
+                DOM.auth.error.classList.remove('hidden');
+            } finally { DOM.auth.loadingSpinner.classList.add('hidden'); }
+        };
+
+        DOM.auth.btnGoogle.onclick = () => signInWithPopup(auth, googleProvider).then(() => DOM.auth.modal.classList.add('hidden'));
+        DOM.auth.btnLogout.onclick = () => signOut(auth);
+        document.getElementById('btn-new').onclick = () => location.reload();
+
+        loadConfig();
     </script>
 
+    <!-- Script de Registro do Service Worker -->
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('sw.js')
-                    .then(reg => console.log('RecargaFast: PWA Pronto!'))
-                    .catch(err => console.log('Erro PWA:', err));
+                    .then(reg => console.log('PWA: Service Worker registrado com sucesso.'))
+                    .catch(err => console.log('PWA: Falha ao registrar Service Worker.', err));
             });
         }
+
+        // Prevenir scroll elástico no iOS
+        document.body.addEventListener('touchmove', function(e) {
+            if (e.target.closest('.overflow-y-auto')) return;
+        }, { passive: false });
     </script>
+
 </body>
 </html>
