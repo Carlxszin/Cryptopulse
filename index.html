@@ -540,21 +540,24 @@
         DOM.btnContinue.addEventListener('click', () => { if (state.phone.length >= 14 && state.operator && state.amount) showLoading(600, () => setStep('checkout')); });
         DOM.btnBack.addEventListener('click', () => setStep('input'));
 
-        DOM.btnPay.addEventListener('click', () => {
-            showLoading(0, async () => {
-                try {
-                    const response = await fetch('/api/create-payment', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            packageId: state.amount.id,
-                            phone: state.phone,
-                            operator: state.operator.id,
-                            userId: auth.currentUser ? auth.currentUser.uid : 'anonymous'
-                        })
-                    });
-                    
-                    if (!response.ok) {
+        DOM.btnPay.addEventListener('click', async () => {
+            // 1. Bloqueia o botão e mostra o loading (Evita duplo clique gerando 2 ordens)
+            DOM.btnPay.disabled = true;
+            DOM.loadingOverlay.classList.remove('hidden');
+
+            try {
+                const response = await fetch('/api/create-payment', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        packageId: state.amount.id,
+                        phone: state.phone,
+                        operator: state.operator.id,
+                        userId: auth.currentUser ? auth.currentUser.uid : 'anonymous'
+                    })
+                });
+                
+                if (!response.ok) {
                         let errorMessage = "Falha ao gerar o PIX.";
                         try {
                             const errorData = await response.json();
@@ -575,18 +578,19 @@
                     setStep('success');
 
                     const unsubscribe = onSnapshot(doc(db, "orders", paymentData.paymentId), (docSnap) => {
-                        if (docSnap.exists() && docSnap.data().status === 'approved') {
-                            markAsApproved();
-                            unsubscribe();
-                        }
-                    });
-                } catch (error) {
-                    console.error(error);
-                    alert("Erro ao processar pagamento: \n\n" + error.message);
-                } finally {
-                    DOM.loadingOverlay.classList.add('hidden');
-                }
-            });
+                    if (docSnap.exists() && docSnap.data().status === 'approved') {
+                        markAsApproved();
+                        unsubscribe();
+                    }
+                });
+            } catch (error) {
+                console.error(error);
+                alert("Erro ao processar pagamento: \n\n" + error.message);
+            } finally {
+                // 2. Apenas esconde o loading e liberta o botão DEPOIS que a API respondeu
+                DOM.loadingOverlay.classList.add('hidden');
+                DOM.btnPay.disabled = false;
+            }
         });
 
         function markAsApproved() {
