@@ -23,15 +23,20 @@
         .glass-card { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); }
         .hidden { display: none !important; }
         @keyframes slideInUp { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-        .animate-slide-in { animation: slideInUp 0.5s ease-out forwards; }
+        .animate-slide-in { animation: slideInUp 0.4s ease-out forwards; }
+        
+        /* Estilo para o botão de brilho */
+        .btn-glow {
+            box-shadow: 0 0 15px rgba(245, 158, 11, 0.4);
+        }
     </style>
 </head>
-<body class="min-h-screen bg-slate-50 text-slate-900 overflow-x-hidden pb-20">
+<body class="min-h-screen bg-slate-50 text-slate-900 overflow-x-hidden">
 
     <!-- Navbar -->
     <nav class="bg-white/80 backdrop-blur-lg border-b border-slate-200/50 sticky top-0 z-50">
         <div class="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
-            <div class="flex items-center gap-2 cursor-pointer" id="logo-btn">
+            <div class="flex items-center gap-2 cursor-pointer" id="logo-btn" onclick="location.reload()">
                 <div class="bg-indigo-600 p-2 rounded-xl shadow-lg">
                     <i data-lucide="zap" class="w-5 h-5 text-white fill-white"></i>
                 </div>
@@ -39,132 +44,189 @@
             </div>
             
             <div class="flex items-center gap-2">
-                <!-- Botão de Instalação Principal -->
-                <button id="pwa-install-btn" class="hidden items-center gap-2 bg-amber-500 text-white hover:bg-amber-600 py-2 px-4 rounded-xl transition-all font-bold text-sm shadow-md animate-bounce">
+                <!-- 1. Botão de Instalação Automática (Oculto por defeito) -->
+                <button id="pwa-install-auto" class="hidden items-center gap-2 bg-amber-500 text-white hover:bg-amber-600 py-2 px-4 rounded-xl transition-all font-bold text-sm shadow-md btn-glow animate-pulse">
                     <i data-lucide="download-cloud" class="w-4 h-4"></i>
-                    <span>Baixar App</span>
+                    <span class="hidden xs:inline">Instalar App</span>
                 </button>
-                <button id="btn-help-install" class="bg-slate-100 p-2 rounded-xl text-slate-500"><i data-lucide="help-circle" class="w-5 h-5"></i></button>
+
+                <!-- 2. Botão de Ajuda/Instalação Manual (Visível se o automático falhar) -->
+                <button id="pwa-install-manual" class="flex items-center gap-2 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 py-2 px-4 rounded-xl transition-all font-bold text-sm border border-indigo-100">
+                    <i data-lucide="plus-circle" class="w-4 h-4"></i>
+                    <span class="hidden xs:inline">Como Instalar?</span>
+                </button>
+
+                <button id="btn-open-login" class="bg-indigo-600 text-white py-2 px-5 rounded-xl font-bold text-sm ml-2">Entrar</button>
             </div>
         </div>
     </nav>
 
-    <!-- Debug Panel (Remover após funcionar) -->
-    <div id="debug-panel" class="bg-slate-900 text-white p-4 text-[10px] font-mono fixed bottom-0 left-0 right-0 z-[200] opacity-90 border-t border-indigo-500">
-        <div class="flex justify-between items-center mb-2">
-            <span class="font-bold text-indigo-400">PAINEL DE DIAGNÓSTICO PWA</span>
-            <button onclick="location.reload()" class="bg-indigo-600 px-2 py-1 rounded">Recarregar Página</button>
-        </div>
-        <p id="debug-https">🔴 HTTPS: A verificar...</p>
-        <p id="debug-sw">🔴 Service Worker: A verificar...</p>
-        <p id="debug-manifest">🔴 Manifesto: A verificar...</p>
-        <p id="debug-prompt">🔴 Prompt: O browser ainda está a avaliar o site...</p>
-        <p class="mt-2 text-slate-400 italic">* Dica: Clique em qualquer lugar da tela e aguarde 10 segundos.</p>
-    </div>
-
     <main class="max-w-5xl mx-auto px-4 py-12 flex flex-col lg:flex-row gap-12 items-center">
-        <div class="w-full lg:w-1/2 space-y-6">
-            <h1 class="text-5xl font-extrabold text-slate-900 leading-tight">Recarga rápida com <span class="text-indigo-600">desconto real.</span></h1>
-            <p class="text-lg text-slate-500 font-medium">Se o botão de baixar não aparecer, tente clicar no botão de ajuda (?) para instruções manuais.</p>
-        </div>
-        <div class="w-full lg:w-1/2 max-w-md">
-            <div class="glass-card rounded-[32px] shadow-2xl border border-white p-8 min-h-[300px] flex flex-col items-center justify-center text-center">
-                <div class="bg-indigo-100 p-4 rounded-2xl mb-4">
-                    <i data-lucide="smartphone" class="w-10 h-10 text-indigo-600"></i>
+        <div class="w-full lg:w-1/2 space-y-6 text-center lg:text-left">
+            <h1 class="text-5xl font-extrabold text-slate-900 leading-tight">
+                Recargas em <span class="text-indigo-600">segundos.</span>
+            </h1>
+            <p class="text-lg text-slate-500 font-medium">Instale a nossa aplicação para ter descontos exclusivos e recargas instantâneas diretamente no seu ecrã inicial.</p>
+            
+            <div class="flex flex-wrap justify-center lg:justify-start gap-4 pt-4">
+                <div class="flex items-center gap-2 text-slate-400 text-sm font-bold">
+                    <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-500"></i>
+                    Sem usar memória
                 </div>
-                <h2 class="text-xl font-bold">Quase lá!</h2>
-                <p class="text-slate-400 text-sm mt-2">Interaja com a página para o navegador liberar o download do aplicativo.</p>
+                <div class="flex items-center gap-2 text-slate-400 text-sm font-bold">
+                    <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-500"></i>
+                    Acesso Offline
+                </div>
+            </div>
+        </div>
+
+        <div class="w-full lg:w-1/2 max-w-md">
+            <div class="glass-card rounded-[40px] shadow-2xl border border-white p-10 flex flex-col items-center justify-center text-center relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-32 h-32 bg-indigo-50 rounded-full -mr-16 -mt-16 blur-3xl opacity-50"></div>
+                
+                <div class="bg-indigo-600/10 p-5 rounded-3xl mb-6">
+                    <i data-lucide="smartphone" class="w-12 h-12 text-indigo-600"></i>
+                </div>
+                <h2 class="text-2xl font-black text-slate-800">Pronto para Instalar</h2>
+                <p class="text-slate-500 mt-3 mb-8">Escolha a melhor forma de adicionar a RecargaFast ao seu telemóvel ou computador.</p>
+                
+                <button id="widget-install-trigger" class="w-full py-4 bg-indigo-600 text-white rounded-2xl font-bold text-lg shadow-xl shadow-indigo-200 hover:bg-indigo-700 active:scale-95 transition-all">
+                    Começar Instalação
+                </button>
             </div>
         </div>
     </main>
 
-    <!-- Modal Ajuda -->
-    <div id="modal-help" class="hidden fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-4">
-        <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" id="close-overlay"></div>
-        <div class="bg-white rounded-t-[32px] sm:rounded-[32px] w-full max-w-md relative z-10 p-8 space-y-6 animate-slide-in">
-            <h3 class="text-2xl font-black">Instalação Manual</h3>
-            <div class="space-y-4">
-                <div class="flex gap-4 p-4 bg-slate-50 rounded-2xl">
-                    <div class="bg-indigo-600 text-white w-8 h-8 flex items-center justify-center rounded-lg font-bold">1</div>
-                    <p class="text-sm">No Chrome/Android, clique nos <b>3 pontos</b> e depois em <b>"Instalar Aplicativo"</b>.</p>
+    <!-- Modal de Instruções de Instalação -->
+    <div id="modal-install" class="hidden fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-4">
+        <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" id="modal-overlay"></div>
+        <div class="bg-white rounded-t-[32px] sm:rounded-[40px] w-full max-w-lg relative z-10 overflow-hidden shadow-2xl animate-slide-in">
+            <div class="p-8">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-2xl font-black text-slate-800">Instalar RecargaFast</h3>
+                    <button id="close-modal" class="text-slate-400 hover:text-slate-900"><i data-lucide="x" class="w-6 h-6"></i></button>
                 </div>
-                <div class="flex gap-4 p-4 bg-slate-50 rounded-2xl">
-                    <div class="bg-indigo-600 text-white w-8 h-8 flex items-center justify-center rounded-lg font-bold">2</div>
-                    <p class="text-sm">No Safari/iPhone, clique em <b>Partilhar</b> e depois <b>"Adicionar ao Ecrã Principal"</b>.</p>
+
+                <!-- Abas ou Seções de Instruções -->
+                <div class="space-y-6">
+                    <!-- Opção Automática (Se disponível) -->
+                    <div id="modal-auto-section" class="hidden p-6 bg-amber-50 rounded-3xl border border-amber-100">
+                        <p class="font-bold text-amber-800 mb-2">Instalação Direta Detetada!</p>
+                        <p class="text-sm text-amber-700 mb-4">O seu navegador suporta a instalação num clique.</p>
+                        <button id="btn-modal-install-now" class="w-full py-3 bg-amber-500 text-white rounded-xl font-bold">Instalar Agora</button>
+                    </div>
+
+                    <p class="text-slate-400 font-bold text-xs uppercase tracking-widest">Ou escolha o seu navegador:</p>
+
+                    <!-- Lista de Instruções Manuais -->
+                    <div class="grid gap-4">
+                        <!-- Opera GX -->
+                        <div class="flex items-center gap-4 p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                            <div class="bg-red-100 p-3 rounded-xl"><i data-lucide="compass" class="w-5 h-5 text-red-600"></i></div>
+                            <div class="flex-1">
+                                <p class="font-bold text-sm text-slate-800">Opera GX / Desktop</p>
+                                <p class="text-xs text-slate-500">Menu <span class="font-bold">Apps</span> → <span class="font-bold">Instalar este site</span></p>
+                            </div>
+                        </div>
+
+                        <!-- iPhone Safari -->
+                        <div class="flex items-center gap-4 p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                            <div class="bg-blue-100 p-3 rounded-xl"><i data-lucide="share" class="w-5 h-5 text-blue-600"></i></div>
+                            <div class="flex-1">
+                                <p class="font-bold text-sm text-slate-800">iPhone (Safari)</p>
+                                <p class="text-xs text-slate-500">Botão <span class="font-bold">Partilhar</span> → <span class="font-bold">Ecrã Principal</span></p>
+                            </div>
+                        </div>
+
+                        <!-- Chrome / Android -->
+                        <div class="flex items-center gap-4 p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                            <div class="bg-amber-100 p-3 rounded-xl"><i data-lucide="more-vertical" class="w-5 h-5 text-amber-600"></i></div>
+                            <div class="flex-1">
+                                <p class="font-bold text-sm text-slate-800">Android (Chrome)</p>
+                                <p class="text-xs text-slate-500">Menu <span class="font-bold">(3 pontos)</span> → <span class="font-bold">Instalar App</span></p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
+
+                <button class="w-full mt-8 py-4 bg-slate-100 text-slate-600 rounded-2xl font-bold" onclick="document.getElementById('modal-install').classList.add('hidden')">
+                    Fechar
+                </button>
             </div>
-            <button class="w-full py-4 bg-indigo-600 text-white rounded-2xl font-bold" onclick="document.getElementById('modal-help').classList.add('hidden')">Fechar</button>
         </div>
     </div>
 
     <script type="module">
         lucide.createIcons();
 
-        const log = (id, text, ok) => {
-            const el = document.getElementById(id);
-            if (el) {
-                el.textContent = `${ok ? '✅' : '🔴'} ${text}`;
-                el.style.color = ok ? '#34d399' : '#f87171';
-            }
-        };
+        // --- Lógica PWA Inteligente ---
+        let deferredPrompt = null;
+        
+        const btnAuto = document.getElementById('pwa-install-auto');
+        const btnManual = document.getElementById('pwa-install-manual');
+        const btnWidget = document.getElementById('widget-install-trigger');
+        const modal = document.getElementById('modal-install');
+        const modalAutoSection = document.getElementById('modal-auto-section');
 
-        // 1. Verificação de HTTPS
-        log('debug-https', location.protocol === 'https:' ? 'HTTPS: Ativo' : 'HTTPS: Necessário', location.protocol === 'https:');
-
-        // 2. Registro de Service Worker
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('sw.js')
-                .then(() => log('debug-sw', 'Service Worker: Ativo e pronto', true))
-                .catch(() => log('debug-sw', 'Service Worker: Erro ao carregar sw.js', false));
-        } else {
-            log('debug-sw', 'Service Worker: Navegador não suporta', false);
-        }
-
-        // 3. Captura do Prompt (O Coração do PWA)
-        let deferredPrompt;
+        // 1. Ouvir o evento de instalação automática (Chrome, Edge, etc)
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
-            log('debug-prompt', 'Prompt: Browser liberou a instalação!', true);
             
-            const btn = document.getElementById('pwa-install-btn');
-            btn.classList.remove('hidden');
-            btn.classList.add('flex');
+            // Prioridade: Mostrar botão automático e ocultar o manual
+            btnAuto.classList.remove('hidden');
+            btnAuto.classList.add('flex');
+            btnManual.classList.add('hidden');
+            
+            // Atualizar o modal também
+            modalAutoSection.classList.remove('hidden');
         });
 
-        // Evento extra: Se já estiver instalado
-        window.addEventListener('appinstalled', () => {
-            log('debug-prompt', 'Prompt: Aplicativo já está instalado!', true);
-            document.getElementById('pwa-install-btn').classList.add('hidden');
-        });
-
-        // Ação do Botão
-        document.getElementById('pwa-install-btn').onclick = async () => {
-            if (!deferredPrompt) return;
-            deferredPrompt.prompt();
-            const { outcome } = await deferredPrompt.userChoice;
-            if (outcome === 'accepted') {
-                document.getElementById('pwa-install-btn').classList.add('hidden');
+        // 2. Ação dos botões
+        const handleInstallClick = async () => {
+            if (deferredPrompt) {
+                // Executar instalação automática
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                if (outcome === 'accepted') {
+                    btnAuto.classList.add('hidden');
+                }
+                deferredPrompt = null;
+            } else {
+                // Mostrar instruções manuais
+                modal.classList.remove('hidden');
             }
-            deferredPrompt = null;
         };
 
-        // 4. Verificação do Manifesto
-        fetch('manifest.json')
-            .then(r => {
-                if(r.ok) log('debug-manifest', 'Manifesto: Configurações lidas com sucesso', true);
-                else log('debug-manifest', 'Manifesto: Ficheiro manifest.json não encontrado', false);
-            })
-            .catch(() => log('debug-manifest', 'Manifesto: Erro de leitura', false));
+        btnAuto.onclick = handleInstallClick;
+        btnWidget.onclick = handleInstallClick;
+        document.getElementById('btn-modal-install-now').onclick = handleInstallClick;
+        
+        // Botão de ajuda manual sempre abre o modal
+        btnManual.onclick = () => {
+            modal.classList.remove('hidden');
+        };
 
-        // Auxiliares de UI
-        document.getElementById('btn-help-install').onclick = () => document.getElementById('modal-help').classList.remove('hidden');
-        document.getElementById('close-overlay').onclick = () => document.getElementById('modal-help').classList.add('hidden');
+        // 3. Fechar Modal
+        document.getElementById('close-modal').onclick = () => modal.classList.add('hidden');
+        document.getElementById('modal-overlay').onclick = () => modal.classList.add('hidden');
 
-        // Truque: Algumas vezes o browser precisa de um "click" para ativar o PWA
-        document.body.addEventListener('click', () => {
-            console.log('Interação detectada para o PWA...');
-        }, {once: true});
+        // 4. Se o app já estiver instalado, ocultar tudo de instalação
+        window.addEventListener('appinstalled', () => {
+            btnAuto.classList.add('hidden');
+            btnManual.classList.add('hidden');
+            btnWidget.textContent = "App Instalado!";
+            btnWidget.disabled = true;
+            btnWidget.classList.replace('bg-indigo-600', 'bg-emerald-500');
+            deferredPrompt = null;
+        });
+
+        // 5. Registro do Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js').catch(err => console.log("SW Error:", err));
+            });
+        }
     </script>
 </body>
 </html>
