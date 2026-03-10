@@ -1,4 +1,4 @@
-const CACHE_NAME = 'recargafast-v1';
+const CACHE_NAME = 'recargafast-v2';
 const ASSETS = [
   'index.html',
   'manifest.json'
